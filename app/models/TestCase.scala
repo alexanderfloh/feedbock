@@ -13,7 +13,7 @@ import se.radley.plugin.salat._
 import se.radley.plugin.salat.Binders._
 import mongoContext._
 
-case class TestCase(id: ObjectId, testName: String, className: String, suiteName: String, configurationName: String)
+case class TestCase(id: ObjectId, testName: String, className: String, suiteName: String, configurationName: String, status: TestStatus)
 
 object TestCase extends TestCaseDAO with TestCaseJson
 
@@ -22,7 +22,7 @@ trait TestCaseDAO extends ModelCompanion[TestCase, ObjectId] {
   val dao = new SalatDAO[TestCase, ObjectId](collection) {}
 
   // Indexes
-  collection.ensureIndex(DBObject("username" -> 1), "user_email", unique = true)
+  //collection.ensureIndex(DBObject("username" -> 1), "user_email", unique = true)
 
   // Queries
   /*def findOneByUsername(username: String): Option[User] = dao.findOne(MongoDBObject("username" -> username))
@@ -44,8 +44,8 @@ trait TestCaseJson {
         "testName" -> u.testName,
         "className" -> u.className,
         "suiteName" -> u.suiteName,
-        "configurationName" -> u.configurationName
-        //"status" -> u.status
+        "configurationName" -> u.configurationName,
+        "status" -> u.status
       )
     }
   }
@@ -55,8 +55,8 @@ trait TestCaseJson {
     (__ \ 'testName).read[String] ~
     (__ \ 'className).read[String] ~
     (__ \ 'suiteName).read[String] ~
-    (__ \ 'configurationName).read[String]
-    //(__ \ 'status).read[TestStatus]
+    (__ \ 'configurationName).read[String] ~
+    (__ \ 'status).read[TestStatus]
     
   )(TestCase.apply _)
 }
