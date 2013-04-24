@@ -55,19 +55,6 @@ trait TestCaseJson {
     (__ \ 'configurationName).write[String] and
     (__ \ 'status).write[TestStatus])
 
-  //  implicit val testCaseJsonWrite = new Writes[TestCase] {
-  //    def writes(u: TestCase): JsValue = {
-  //      Json.obj(
-  //        "id" -> u.id,
-  //        "buildNumber" -> u.buildNumber,
-  //        "testName" -> u.testName,
-  //        "className" -> u.className,
-  //        "suiteName" -> u.suiteName,
-  //        "configurationName" -> u.configurationName,
-  //        "status" -> u.status)
-  //    }
-  //  }
-  //testName: String, className: String, suiteName: String, configurationName: String, status: TestStatus
   implicit val testCaseJsonRead = (
     (__ \ 'id).read[ObjectId] ~
     (__ \ 'buildNumber).read[Long] ~
