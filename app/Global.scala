@@ -3,7 +3,6 @@ import play.api._
 import libs.ws.WS
 import models._
 import se.radley.plugin.salat._
-import results.Passed
 
 object Global extends GlobalSettings {
   override def onStart(app: Application) {

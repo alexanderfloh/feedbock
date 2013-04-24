@@ -12,10 +12,11 @@ object Application extends Controller {
   
   def viewDetails(id: String) = TODO
   
-  def load() = Action {
-    val testcases = results.Results.loadResultsForBuild(results.Build(842, "http://lnz-bobthebuilder/hudson/job/Trigger%20BVT%20Testset%20AllInOne/842/"))
+  def load(buildNumber: Int) = Action {
+    val testcases = results.Results.loadResultsForBuild(
+        results.Build(buildNumber, "http://lnz-bobthebuilder/hudson/job/Trigger%20BVT%20Testset%20AllInOne/" + buildNumber + "/"))
+    testcases.foreach(TestCase.save _)
     Ok(views.html.index(testcases.toList))
-    //Ok(views.html.index(TestCase.findByBuildNumber(buildNumber)))
   }
   
   def bla(status: String) = Action {

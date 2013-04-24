@@ -7,7 +7,7 @@ GET     /                           controllers.Application.index
 
 GET		/details/:id				controllers.Application.viewDetails(id: String)
 
-GET		/load						controllers.Application.load
+GET		/load/:buildNumber						controllers.Application.load(buildNumber: Int)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
