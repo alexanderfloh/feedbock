@@ -15,7 +15,7 @@ import mongoContext._
 
 case class TestCase(
   id: ObjectId,
-  buildNumber: Int,
+  buildNumber: Long,
   testName: String,
   className: String,
   suiteName: String,
@@ -33,12 +33,13 @@ trait TestCaseDAO extends ModelCompanion[TestCase, ObjectId] {
 
   // Queries
   def all(): List[TestCase] = dao.find(MongoDBObject.empty).toList
-  /*def findOneByUsername(username: String): Option[User] = dao.findOne(MongoDBObject("username" -> username))
-  def findByCountry(country: String) = dao.find(MongoDBObject("address.country" -> country))
-  def authenticate(username: String, password: String): Option[User] = findOne(DBObject("username" -> username, "password" -> password))
+  def findByBuildNumber(buildNumber: Long): List[TestCase] = dao.find(MongoDBObject("buildNumber" -> buildNumber)).toList
+  def findByStatus(status: String) = dao.find(MongoDBObject("status.name" -> status)).toList
+//  def findByCountry(country: String) = dao.find(MongoDBObject("address.1country" -> country))
+//  def authenticate(username: String, password: String): Option[User] = findOne(DBObject("username" -> username, "password" -> password))
 
  
-*/ }
+ }
 
 /**
  * Trait used to convert to and from json
@@ -47,7 +48,7 @@ trait TestCaseJson {
 
   implicit val testCaseJsonWrite = (
     (__ \ 'id).write[ObjectId] and
-    (__ \ 'buildNumber).write[Int] and
+    (__ \ 'buildNumber).write[Long] and
     (__ \ 'testName).write[String] and
     (__ \ 'className).write[String] and
     (__ \ 'suiteName).write[String] and
@@ -69,7 +70,7 @@ trait TestCaseJson {
   //testName: String, className: String, suiteName: String, configurationName: String, status: TestStatus
   implicit val testCaseJsonRead = (
     (__ \ 'id).read[ObjectId] ~
-    (__ \ 'buildNumber).read[Int] ~
+    (__ \ 'buildNumber).read[Long] ~
     (__ \ 'testName).read[String] ~
     (__ \ 'className).read[String] ~
     (__ \ 'suiteName).read[String] ~
