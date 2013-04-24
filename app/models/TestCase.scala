@@ -13,7 +13,14 @@ import se.radley.plugin.salat._
 import se.radley.plugin.salat.Binders._
 import mongoContext._
 
-case class TestCase(id: ObjectId, testName: String, className: String, suiteName: String, configurationName: String, status: TestStatus)
+case class TestCase(
+  id: ObjectId,
+  buildNumber: Int,
+  testName: String,
+  className: String,
+  suiteName: String,
+  configurationName: String,
+  status: TestStatus)
 
 object TestCase extends TestCaseDAO with TestCaseJson
 
@@ -25,38 +32,47 @@ trait TestCaseDAO extends ModelCompanion[TestCase, ObjectId] {
   //collection.ensureIndex(DBObject("username" -> 1), "user_email", unique = true)
 
   // Queries
+  def all(): List[TestCase] = dao.find(MongoDBObject.empty).toList
   /*def findOneByUsername(username: String): Option[User] = dao.findOne(MongoDBObject("username" -> username))
   def findByCountry(country: String) = dao.find(MongoDBObject("address.country" -> country))
   def authenticate(username: String, password: String): Option[User] = findOne(DBObject("username" -> username, "password" -> password))
 
  
-*/}
+*/ }
 
 /**
  * Trait used to convert to and from json
  */
 trait TestCaseJson {
 
-  implicit val testCaseJsonWrite = new Writes[TestCase] {
-    def writes(u: TestCase): JsValue = {
-      Json.obj(
-        "id" -> u.id,
-        "testName" -> u.testName,
-        "className" -> u.className,
-        "suiteName" -> u.suiteName,
-        "configurationName" -> u.configurationName,
-        "status" -> u.status
-      )
-    }
-  }
+  implicit val testCaseJsonWrite = (
+    (__ \ 'id).write[ObjectId] and
+    (__ \ 'buildNumber).write[Int] and
+    (__ \ 'testName).write[String] and
+    (__ \ 'className).write[String] and
+    (__ \ 'suiteName).write[String] and
+    (__ \ 'configurationName).write[String] and
+    (__ \ 'status).write[TestStatus])
+
+  //  implicit val testCaseJsonWrite = new Writes[TestCase] {
+  //    def writes(u: TestCase): JsValue = {
+  //      Json.obj(
+  //        "id" -> u.id,
+  //        "buildNumber" -> u.buildNumber,
+  //        "testName" -> u.testName,
+  //        "className" -> u.className,
+  //        "suiteName" -> u.suiteName,
+  //        "configurationName" -> u.configurationName,
+  //        "status" -> u.status)
+  //    }
+  //  }
   //testName: String, className: String, suiteName: String, configurationName: String, status: TestStatus
   implicit val testCaseJsonRead = (
     (__ \ 'id).read[ObjectId] ~
+    (__ \ 'buildNumber).read[Int] ~
     (__ \ 'testName).read[String] ~
     (__ \ 'className).read[String] ~
     (__ \ 'suiteName).read[String] ~
     (__ \ 'configurationName).read[String] ~
-    (__ \ 'status).read[TestStatus]
-    
-  )(TestCase.apply _)
+    (__ \ 'status).read[TestStatus])(TestCase.apply _)
 }

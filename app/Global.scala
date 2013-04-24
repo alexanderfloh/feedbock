@@ -7,9 +7,9 @@ import results.Passed
 
 object Global extends GlobalSettings {
   override def onStart(app: Application) {
-    val c = TestCase(new ObjectId(), "test1", "class1j", "suite1", "Win 7 config", TestStatus("Passed"));
+    val c = TestCase(new ObjectId(), 1234, "test1", "class1j", "suite1", "Win 7 config", TestStatus("Passed"));
     TestCase.save(c)
-    val c1 = TestCase(new ObjectId(), "test1", "class1j", "suite1", "Win 7 config", TestStatus("Passed"));
+    val c1 = TestCase(new ObjectId(), 1234, "test1", "class1j", "suite1", "Win 7 config", TestStatus("Passed"));
     TestCase.save(c1)
   }
 

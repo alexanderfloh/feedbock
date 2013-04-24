@@ -1,3 +1,4 @@
+@(testCases: List[TestCase])
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -51,15 +52,9 @@
     <div class="container">
       <h1>Feedbock</h1>
       <ul>
-        <li><a href="#">entry 1</a></li>
-        <li><a href="#">entry 2</a></li>
-        <li><a href="#">entry 3</a></li>
-        <li><a href="#">entry 4</a></li>
-        <li><a href="#">entry 5</a></li>
-        <li><a href="#">entry 6</a></li>
-        <li><a href="#">entry 7</a></li>
-        <li><a href="#">entry 8</a></li>
-        <li><a href="#">entry 9</a></li>
+      	@testCases.map { tc =>
+      	  <li>@tc.testName</li>
+      	}
       </ul>
     </div> <!-- /container -->
     <script src="assets/javascripts/require-jquery.js" data-main="assets/javascripts/main"></script>
