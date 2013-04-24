@@ -1,3 +1,5 @@
+.cache
+.target
 .DS_Store
 bin
 logs

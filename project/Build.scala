@@ -9,8 +9,8 @@ object ApplicationBuild extends Build {
 
   val appDependencies = Seq(
     // Add your project dependencies here,
-    jdbc,
-    anorm,
+    //jdbc,
+    //anorm,
     "se.radley" %% "play-plugins-salat" % "1.2"
   )
 
@@ -19,7 +19,7 @@ object ApplicationBuild extends Build {
     // Add your own project settings here     
     routesImport += "se.radley.plugin.salat.Binders._",
     templatesImport += "org.bson.types.ObjectId",
-    resolvers += "Sonatype snapshots" at "http://oss.sonatype.org/content/repositories/snapshots/"
+    resolvers += Resolver.sonatypeRepo("snapshots")
 
   )
 
