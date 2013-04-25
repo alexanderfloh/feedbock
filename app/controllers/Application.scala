@@ -3,6 +3,7 @@ package controllers
 import play.api._
 import play.api.mvc._
 import models._
+import views.html.defaultpages.badRequest
 
 object Application extends Controller {
   
@@ -10,7 +11,12 @@ object Application extends Controller {
     Ok(views.html.index(TestCase.all))
   }
   
-  def viewDetails(id: String) = TODO
+  def viewDetails(id: String) = Action {
+    TestCase.getById(id).map{ tc =>
+      Ok(views.html.testCaseDetails(tc))
+      }.getOrElse(NotFound(""))
+    
+  }
   
   def load(buildNumber: Int) = Action {
     val testcases = results.Results.loadResultsForBuild(
