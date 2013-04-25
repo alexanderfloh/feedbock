@@ -28,7 +28,7 @@ object TestCaseHistory extends ModelCompanion[TestCaseHistory, ObjectId] {
   val dao = new SalatDAO[TestCaseHistory, ObjectId](collection) {}
 
   def getHistoryByTestCase(testCase: TestCase): List[TestCaseHistory] = {
-    dao.find(MongoDBObject("testName" -> testCase.testName)).sort(orderBy = MongoDBObject("timestamp" -> -1)).toList
+    dao.find(MongoDBObject("testName" -> testCase.testName, "className" -> testCase.className, "suiteName" -> testCase.suiteName)).sort(orderBy = MongoDBObject("timestamp" -> -1)).toList
   }
 }
 

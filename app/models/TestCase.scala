@@ -43,6 +43,9 @@ trait TestCaseDAO extends ModelCompanion[TestCase, ObjectId] {
     // find highest build number
     val cursor = dao.find(MongoDBObject("suiteName" -> suite, "className" -> clazz, "testName" -> test))
     .sort(orderBy = MongoDBObject("buildNumber" -> -1));
+    if (!cursor.hasNext) {
+      throw new RuntimeException("no data");
+    }
     val testCase = cursor.next();
     dao.find(MongoDBObject("suiteName" -> suite, "className" -> clazz, "testName" -> test, "buildNumber" -> testCase.buildNumber)).toList
   }

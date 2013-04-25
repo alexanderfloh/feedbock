@@ -1,4 +1,4 @@
-@(testCase: TestCase, history: List[TestCaseHistory], feedbackForm: Form[(Boolean, Boolean, Boolean, String)])
+@(testCase: TestCase, history: List[TestCaseHistory], feedbackForm: Form[(Boolean, Boolean, Boolean, String)], configurations: List[(String, models.TestStatus)])
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -51,7 +51,13 @@
     </div>
     <div class="container">
         @helper.form(action = routes.Application.submitFeedback(testCase.suiteName, testCase.className, testCase.testName), 'class -> "form-horizontal span6") {
+        	<ul>
+        		@configurations.map { entry =>
+        			<li>@entry._1, @entry._2.name</li>
+        		}
+        	</ul>
 			<fieldset>
+
 				<div class="control-group">
 					<label class="control-label">Build Number</label>
 					<div class="controls">

@@ -31,9 +31,14 @@ object Application extends Controller {
     val results = TestCase.findBySuiteClassAndTest(suite, clazz, test)
     
     val firstResult = results.head
+    
+    val configurationNames = results.map(entry => (entry.configurationName, entry.status))
+    
+    
+    
     val history = TestCaseHistory.getHistoryByTestCase(firstResult)
     
-    Ok(views.html.testCaseDetails(firstResult, history, feedbackForm))
+    Ok(views.html.testCaseDetails(firstResult, history, feedbackForm, configurationNames))
     
   }
 
@@ -50,13 +55,14 @@ object Application extends Controller {
     
     val results = TestCase.findBySuiteClassAndTest(suite, className, test)
     val firstResult = results.head
+    val configurationNames = results.map(entry => (entry.configurationName, entry.status))
     
     val mostRecentBuild = MetaInformation.findByKey("mostRecentBuildNumber").map(_.toInt).getOrElse(0)
     val additionalData = Map("defect" -> defect, "codeChange" -> codeChange, "timing" -> timing).map{case (key, value) => (key, value.toString)}
     val history = TestCaseHistory(mostRecentBuild, className, suite, test, comment, DateTime.now, additionalData)
     TestCaseHistory.insert(history)
     
-    Ok(views.html.testCaseDetails(firstResult, TestCaseHistory.getHistoryByTestCase(firstResult), feedbackForm))
+    Ok(views.html.testCaseDetails(firstResult, TestCaseHistory.getHistoryByTestCase(firstResult), feedbackForm, configurationNames))
   }
   
   val feedbackForm = Form(
