@@ -41,7 +41,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="brand" href="#">Feedbock</a>
+          <a class="brand" href="/">Feedbock</a>
           <div class="nav-collapse collapse">
             <ul class="nav">
               <li class="active"><a href="#">Home</a></li>
@@ -83,7 +83,7 @@
 					<label class="control-label">Defect</label>
 					<div class="controls">
 						<label class="checkbox">
-							<input type="checkbox" name="defect" value="" />
+							<input type="checkbox" name="defect" value="true" />
 						</label>
 					</div>
 				</div>
@@ -91,7 +91,7 @@
 					<label class="control-label">Code Change</label>
 					<div class="controls">
 						<label class="checkbox">
-							<input type="checkbox" name="codeChange" value="" />
+							<input type="checkbox" name="codeChange" value="true" />
 						</label>
 					</div>
 				</div>
@@ -99,7 +99,7 @@
 					<label class="control-label">Timing Issue</label>
 					<div class="controls">
 						<label class="checkbox">
-							<input type="checkbox" name="timing" value="" />
+							<input type="checkbox" name="timing" value="true" />
 						</label>
 					</div>
 				</div>
@@ -125,7 +125,11 @@
 			<h2 class="span5">History</h2>
 			@history.map { entry =>
 				<div class="span5">
+					<span class="badge">@entry.buildNumber</span>
 					@entry.comment
+					@if(entry.isDefect) { <span class="label label-info">Defect</span> }
+					@if(entry.isCodeChange) { <span class="label label-info">Code Change</span> }
+					@if(entry.isTiming) { <span class="label label-info">Timing issue</span> }
 				</div>
 			}
       	</div>

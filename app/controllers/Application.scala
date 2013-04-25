@@ -26,15 +26,15 @@ object Application extends Controller {
     result.getOrElse(BadRequest("unable to access jenkins"))
 
   }
-  
+
   def viewDetails(suite: String, clazz: String, test: String) = Action {
     val results = TestCase.findBySuiteClassAndTest(suite, clazz, test)
-    
+
     val firstResult = results.head
     val history = TestCaseHistory.getHistoryByTestCase(firstResult)
-    
+
     Ok(views.html.testCaseDetails(firstResult, history, feedbackForm))
-    
+
   }
 
   def loadBuild(buildNumber: Int) = Action {
@@ -44,28 +44,26 @@ object Application extends Controller {
     testcases.foreach(TestCase.save _)
     Ok(testcases.toList.mkString("\n"))
   }
-  
+
   def submitFeedback(suite: String, className: String, test: String) = Action { implicit request =>
-    val(defect, codeChange, timing, comment) = feedbackForm.bindFromRequest.get
-    
+    val (defect, codeChange, timing, comment) = feedbackForm.bindFromRequest.get
+
     val results = TestCase.findBySuiteClassAndTest(suite, className, test)
     val firstResult = results.head
-    
+
     val mostRecentBuild = MetaInformation.findByKey("mostRecentBuildNumber").map(_.toInt).getOrElse(0)
-    val additionalData = Map("defect" -> defect, "codeChange" -> codeChange, "timing" -> timing).map{case (key, value) => (key, value.toString)}
+    val additionalData = Map("defect" -> defect, "codeChange" -> codeChange, "timing" -> timing).map { case (key, value) => (key, value.toString) }
     val history = TestCaseHistory(mostRecentBuild, className, suite, test, comment, DateTime.now, additionalData)
     TestCaseHistory.insert(history)
-    
+
     Redirect(routes.Application.viewDetails(suite, className, test))
   }
-  
+
   val feedbackForm = Form(
-      tuple(
-          "defect" -> boolean,
-          "codeChange" -> boolean,
-          "timing" -> boolean,
-          "comment" -> text
-          )
-      )
+    tuple(
+      "defect" -> boolean,
+      "codeChange" -> boolean,
+      "timing" -> boolean,
+      "comment" -> text))
 
 }

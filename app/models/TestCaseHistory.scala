@@ -21,7 +21,12 @@ case class TestCaseHistory(
   testName: String,
   comment: String,
   timestamp: DateTime,
-  additionalData: Map[String, String])
+  additionalData: Map[String, String]) {
+  
+  def isDefect = additionalData.get("defect").map(_.toBoolean).getOrElse(false)
+  def isCodeChange = additionalData.get("codeChange").map(_.toBoolean).getOrElse(false)
+  def isTiming = additionalData.get("timing").map(_.toBoolean).getOrElse(false)
+}
 
 object TestCaseHistory extends ModelCompanion[TestCaseHistory, ObjectId] {
   def collection = mongoCollection("testCaseHistory")
