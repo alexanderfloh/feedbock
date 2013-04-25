@@ -1,4 +1,4 @@
-@(passedCount: Int, testCases: List[(String, Seq[TestCase])])
+@(passedCount: Int, currentBuild: Int, testCases: List[(String, Seq[TestCase])])
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -58,7 +58,8 @@
       </h1>
       <div class="row">
 	      <div class="span4">
-	      	<div class="hero-unit"><h1>You're doing well!</h1><p><span class="text-info">@passedCount</span> tests passed.</p></div>
+	      	<div class="hero-unit"><h1>You're doing well!</h1><p>
+	      	<span class="text-info">@passedCount</span> tests passed for build <span class="text-info">@currentBuild.</span></p></div>
 	      </div>
 	      
 	      <div class="span8">
@@ -70,7 +71,7 @@
 		      	@testCases.head.className</br>
 		      	@testCases.head.suiteName</br>
 		      	Test failed on 
-		      	@testCases.map{ tc =>  <span class="label label-success">@tc.configurationName</span> }
+		      	@testCases.map{ tc =>  <span class="label label-info">@tc.configurationName</span> }
 		      	</section>
 		      </article>
 		      }
