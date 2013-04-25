@@ -1,4 +1,4 @@
-@(testCase: TestCase, history: List[TestCaseHistory])
+@(testCase: TestCase, history: List[TestCaseHistory], feedbackForm: Form[(Boolean, Boolean, Boolean, String)])
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -27,7 +27,7 @@
     <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/assets/ico/apple-touch-icon-114-precomposed.png">
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/assets/ico/apple-touch-icon-72-precomposed.png">
     <link rel="apple-touch-icon-precomposed" href="/assets/ico/apple-touch-icon-57-precomposed.png">
-    <link rel="shortcut icon" href="/assets/images/favicon.png">
+    <link rel="shortcut icon" href="/assets/images/favicon.ico">
   </head>
   <body>
     <div class="navbar navbar-inverse navbar-fixed-top">
@@ -50,7 +50,11 @@
       </div>
     </div>
     <div class="container">
+<<<<<<< HEAD
         <form class="form-horizontal span5">
+=======
+        @helper.form(action = routes.Application.submit, 'class -> "form-horizontal span6") {
+>>>>>>> 4e91d22e79c1f7c0c2b472bead6367047c1e7f1c
 			<fieldset>
 				<div class="control-group">
 					<label class="control-label">Build Number</label>
@@ -111,11 +115,6 @@
 				</div>
 			}
       	</div>
-      <!-- 
-      
-       "_id" : ObjectId("517833e803648d88302bb420"), "buildNumber" : NumberLong(1234), "testName" : "test1", "className" : "class1j", "suiteName" : "suite1", "configurationName" : "Win 7 config", "status" : { "name" : "Passed" }
-      
-       -->
     </div> <!-- /container -->
     <script src="/assets/javascripts/require-jquery.js" data-main="/assets/javascripts/main"></script>
   </body>

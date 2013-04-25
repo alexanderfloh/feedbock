@@ -11,17 +11,24 @@ import se.radley.plugin.salat._
 import se.radley.plugin.salat.Binders._
 import mongoContext._
 import com.mongodb.casbah.commons.MongoDBObject
+import org.joda.time.DateTime
+import play.libs.Json._
 
-
-case class TestCaseHistory(buildNumber:Int, className:String, suiteName: String, testName: String, comment: String) {
-}
+case class TestCaseHistory(
+  buildNumber: Int,
+  className: String,
+  suiteName: String,
+  testName: String,
+  comment: String,
+  timestamp: DateTime,
+  additionalData: Map[String, String])
 
 object TestCaseHistory extends ModelCompanion[TestCaseHistory, ObjectId] {
   def collection = mongoCollection("testCaseHistory")
   val dao = new SalatDAO[TestCaseHistory, ObjectId](collection) {}
-  
-  def getHistoryByTestCase(testCase: TestCase) :List[TestCaseHistory] = {
+
+  def getHistoryByTestCase(testCase: TestCase): List[TestCaseHistory] = {
     dao.find(MongoDBObject("testName" -> testCase.testName)).toList
   }
-  
 }
+

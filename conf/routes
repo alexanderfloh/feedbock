@@ -5,12 +5,11 @@
 # Home page
 GET     /                           			controllers.Application.index
 
-GET		/detailsById/:id							controllers.Application.viewDetailsById(id: String)
-
 GET		/details/:suite/:clazz/:test			controllers.Application.viewDetails(suite: String, clazz: String, test: String)
 
-GET		/load									controllers.Application.load
 GET		/loadBuild/:buildNumber						controllers.Application.loadBuild(buildNumber: Int)
+
+POST	/submit									controllers.Application.submit
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               			controllers.Assets.at(path="/public", file)
