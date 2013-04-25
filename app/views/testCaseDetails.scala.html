@@ -1,4 +1,7 @@
 @(testCase: TestCase, history: List[TestCaseHistory], feedbackForm: Form[(Boolean, Boolean, Boolean, String)])
+
+@import helper._
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -80,7 +83,7 @@
 					<label class="control-label">Defect</label>
 					<div class="controls">
 						<label class="checkbox">
-							@helper.checkbox(feedbackForm("defect"))
+							<input type="checkbox" name="defect" value="" />
 						</label>
 					</div>
 				</div>
@@ -88,20 +91,34 @@
 					<label class="control-label">Code Change</label>
 					<div class="controls">
 						<label class="checkbox">
-							@helper.checkbox(feedbackForm("codeChange"))
+							<input type="checkbox" name="codeChange" value="" />
 						</label>
 					</div>
 				</div>
 				<div class="control-group">
-					<label class="control-label">Timing</label>
+					<label class="control-label">Timing Issue</label>
 					<div class="controls">
 						<label class="checkbox">
-							@helper.checkbox(feedbackForm("timing"))
+							<input type="checkbox" name="timing" value="" />
 						</label>
 					</div>
 				</div>
-				@helper.textarea(feedbackForm("comment"))
-				<input type="submit" />
+				<div class="control-group">
+					<label class="control-label">Comment</label>
+					<div class="controls">
+						<label class="textarea">
+							<textarea name="comment" rows="5" placeholder="enter a comment..."></textarea>
+						</label>
+					</div>
+				</div>
+				<div class="control-group">
+					<div class="controls">
+						<label class="submit">
+							<input type="submit" />
+						</label>
+					</div>
+				</div>
+				
 			</fieldset>
 			}
 		<div class="row">
