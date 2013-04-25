@@ -10,6 +10,7 @@ import play.api.libs.functional.syntax._
 import se.radley.plugin.salat._
 import se.radley.plugin.salat.Binders._
 import mongoContext._
+import com.mongodb.casbah.commons.MongoDBObject
 
 case class TestCase(
   id: ObjectId,
@@ -38,9 +39,9 @@ trait TestCaseDAO extends ModelCompanion[TestCase, ObjectId] {
   def getById(id: String) = dao.findOneById(new ObjectId(id))
   //  def findByCountry(country: String) = dao.find(MongoDBObject("address.1country" -> country))
 //  def authenticate(username: String, password: String): Option[User] = findOne(DBObject("username" -> username, "password" -> password))
-
- 
- }
+  def findBySuiteClassAndTest(suite: String, clazz: String, test: String): List[TestCase] =
+    dao.find(MongoDBObject("suiteName" -> suite, "className" -> clazz, "testName" -> test)).toList
+}
 
 /**
  * Trait used to convert to and from json

@@ -23,10 +23,16 @@ object Application extends Controller {
 
   }
   
-  def viewDetails(id: String) = Action {
+  def viewDetailsById(id: String) = Action {
     TestCase.getById(id).map{ tc =>
       Ok(views.html.testCaseDetails(tc))
       }.getOrElse(NotFound(""))
+    
+  }
+
+  def viewDetails(suite: String, clazz: String, test: String) = Action {
+    val results = TestCase.findBySuiteClassAndTest(suite, clazz, test)
+    Ok(views.html.testCaseDetails(results.head))
     
   }
 

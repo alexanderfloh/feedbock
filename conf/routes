@@ -5,7 +5,9 @@
 # Home page
 GET     /                           			controllers.Application.index
 
-GET		/details/:id							controllers.Application.viewDetails(id: String)
+GET		/detailsById/:id							controllers.Application.viewDetailsById(id: String)
+
+GET		/details/:suite/:clazz/:test			controllers.Application.viewDetails(suite: String, clazz: String, test: String)
 
 GET		/load									controllers.Application.load
 GET		/loadBuild/:buildNumber						controllers.Application.loadBuild(buildNumber: Int)
