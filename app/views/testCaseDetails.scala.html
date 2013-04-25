@@ -50,8 +50,7 @@
       </div>
     </div>
     <div class="container">
-        <form class="form-horizontal span5">
-        @helper.form(action = routes.Application.submit, 'class -> "form-horizontal span6") {
+        @helper.form(action = routes.Application.submitFeedback(testCase.suiteName, testCase.className, testCase.testName), 'class -> "form-horizontal span6") {
 			<fieldset>
 				<div class="control-group">
 					<label class="control-label">Build Number</label>
@@ -101,10 +100,10 @@
 						</label>
 					</div>
 				</div>
+				@helper.textarea(feedbackForm("comment"))
+				<input type="submit" />
 			</fieldset>
 			}
-		</form>
-		
 		<div class="row">
 			<h2 class="span5">History</h2>
 			@history.map { entry =>

@@ -9,7 +9,7 @@ GET		/details/:suite/:clazz/:test			controllers.Application.viewDetails(suite: S
 
 GET		/loadBuild/:buildNumber						controllers.Application.loadBuild(buildNumber: Int)
 
-POST	/submit									controllers.Application.submit
+POST	/submitFeedback/:suite/:className/:test		controllers.Application.submitFeedback(suite: String, className: String, test: String)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               			controllers.Assets.at(path="/public", file)
