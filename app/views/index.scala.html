@@ -66,7 +66,7 @@
 	      <h1>To improve on that result, consider investigating one of those:</h1>
 		      @testCases.map { case (tcName, testCases) => 
 		      <article>
-		      	<h2><a href="/details/@testCases.head.id">@tcName</a></h2>
+		      	<h2><a href="/details/@testCases.head.suiteName/@testCases.head.className/@testCases.head.testName">@tcName</a></h2>
 		      	<section>
 		      	@testCases.head.className</br>
 		      	@testCases.head.suiteName</br>

@@ -1,6 +1,8 @@
 package controllers
 
 import play.api._
+import play.api.data._
+import play.api.data.Forms._
 import play.api.mvc._
 import models._
 import results.{ Results, Build }
@@ -24,42 +26,14 @@ object Application extends Controller {
 
   }
   
-  def viewDetailsById(id: String) = Action {
-    TestCase.getById(id).map{ tc =>
-      Ok(views.html.testCaseDetails(tc, null))
-    }.getOrElse(NotFound(""))
-
-  }
-
   def viewDetails(suite: String, clazz: String, test: String) = Action {
     val results = TestCase.findBySuiteClassAndTest(suite, clazz, test)
     
     val firstResult = results.head
     val history = TestCaseHistory.getHistoryByTestCase(firstResult)
     
-    Ok(views.html.testCaseDetails(firstResult, history))
+    Ok(views.html.testCaseDetails(firstResult, history, feedbackForm))
     
-  }
-
-  def isNewBuildAvailable = {
-    val optResult = for {
-      localMostRecent <- MetaInformation.findByKey("mostRecentBuildNumber")
-      remoteMostRecent <- results.Results.findMostRecentBuild(jobUrl)
-    } yield localMostRecent.toInt < remoteMostRecent.number
-    optResult.getOrElse(true)
-  }
-
-  def load = Action {
-    if (isNewBuildAvailable) {
-      val testcases = results.Results.loadMostRecentBuild(jobUrl)
-      testcases.map {
-        case (buildNumber, cases) => {
-          MetaInformation.insertOrUpdate("mostRecentBuildNumber", buildNumber.toString)
-          cases.foreach(TestCase.save _)
-        }
-      }
-      Ok(testcases.toList.mkString("\n"))
-    } else { Ok("up to date") }
   }
 
   def loadBuild(buildNumber: Int) = Action {
@@ -69,5 +43,20 @@ object Application extends Controller {
     testcases.foreach(TestCase.save _)
     Ok(testcases.toList.mkString("\n"))
   }
+  
+  def submit = Action { implicit request =>
+    val(defect, codeChange, timing, comment) = feedbackForm.bindFromRequest.get
+    
+    Ok("")
+  }
+  
+  val feedbackForm = Form(
+      tuple(
+          "defect" -> boolean,
+          "codeChange" -> boolean,
+          "timing" -> boolean,
+          "comment" -> text
+          )
+      )
 
 }
