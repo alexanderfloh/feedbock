@@ -3,7 +3,7 @@ package controllers
 import play.api._
 import play.api.mvc._
 import models._
-import results.{Results, Build}
+import results.{ Results, Build }
 import views.html.defaultpages.badRequest
 
 object Application extends Controller {
@@ -11,23 +11,24 @@ object Application extends Controller {
   val jobUrl = "http://lnz-bobthebuilder/hudson/job/Trigger%20BVT%20Testset%20AllInOne/"
 
   def index = Action {
-    val mostRecentBuild = results.Results.findMostRecentBuild(jobUrl)
+    val mostRecentBuild = MetaInformation.findByKey("mostRecentBuildNumber")
     val result = for {
-      failed <- mostRecentBuild.map(b => TestCase.findByBuildAndStatus(b.number, "Failed"))
-      passedCount <- mostRecentBuild.map(b => TestCase.findByBuildAndStatus(b.number, "Passed").size)
+      build <- mostRecentBuild
     } yield {
-      val grouped = failed.toList.groupBy(_.testName).toList.sortBy { x => x._2.size }.reverse
-      Ok(views.html.index(passedCount, grouped))
+      val failed = TestCase.findByBuildAndStatus(build.toInt, "Failed").toList
+      val passedCount = TestCase.findByBuildAndStatus(build.toInt, "Passed").size
+      val grouped = failed.groupBy(_.testName).toList.sortBy { x => x._2.size }.reverse
+      Ok(views.html.index(passedCount, build.toInt, grouped))
     }
     result.getOrElse(BadRequest("unable to access jenkins"))
 
   }
-  
+
   def viewDetails(id: String) = Action {
-    TestCase.getById(id).map{ tc =>
+    TestCase.getById(id).map { tc =>
       Ok(views.html.testCaseDetails(tc))
-      }.getOrElse(NotFound(""))
-    
+    }.getOrElse(NotFound(""))
+
   }
 
   def isNewBuildAvailable = {
@@ -50,10 +51,10 @@ object Application extends Controller {
       Ok(testcases.toList.mkString("\n"))
     } else { Ok("up to date") }
   }
-  
+
   def loadBuild(buildNumber: Int) = Action {
     val triggeringBuild = Results.findRootTriggerBuild(jobUrl + "/" + buildNumber.toString)
-    
+
     val testcases = Results.loadResultsForBuild(Build(buildNumber, jobUrl + "/" + buildNumber.toString), triggeringBuild.number)
     testcases.foreach(TestCase.save _)
     Ok(testcases.toList.mkString("\n"))

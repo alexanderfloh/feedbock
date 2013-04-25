@@ -3,13 +3,17 @@ import play.api._
 import libs.ws.WS
 import models._
 import se.radley.plugin.salat._
+import play.libs.Akka
+import akka.actor.Props
+import actors.TestResultLoadActor
+import concurrent.duration._
+import play.api.libs.concurrent.Execution.Implicits._
+
 
 object Global extends GlobalSettings {
   override def onStart(app: Application) {
-    val c = TestCase(new ObjectId(), 1234, "test1", "class1j", "suite1", "Win 7 config", TestStatus("Passed"));
-    TestCase.save(c)
-    val c1 = TestCase(new ObjectId(), 1234, "test1", "class1j", "suite1", "Win 7 config", TestStatus("Passed"));
-    TestCase.save(c1)
+    val actor = Akka.system.actorOf(Props[TestResultLoadActor], name = "testResultLoadActor")
+    Akka.system.scheduler.schedule(5.seconds, 5.minutes, actor, actors.LoadResult)
   }
 
   override def onStop(app: Application) {
