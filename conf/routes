@@ -3,11 +3,12 @@
 # ~~~~
 
 # Home page
-GET     /                           controllers.Application.index
+GET     /                           			controllers.Application.index
 
-GET		/details/:id				controllers.Application.viewDetails(id: String)
+GET		/details/:id							controllers.Application.viewDetails(id: String)
 
-GET		/load/:buildNumber						controllers.Application.load(buildNumber: Int)
+GET		/load									controllers.Application.load
+GET		/loadBuild/:buildNumber						controllers.Application.loadBuild(buildNumber: Int)
 
 # Map static resources from the /public folder to the /assets URL path
-GET     /assets/*file               controllers.Assets.at(path="/public", file)
+GET     /assets/*file               			controllers.Assets.at(path="/public", file)

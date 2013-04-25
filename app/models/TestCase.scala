@@ -1,7 +1,6 @@
 package models
 
 import play.api.Play.current
-import java.util.Date
 import com.novus.salat._
 import com.novus.salat.annotations._
 import com.novus.salat.dao._
@@ -35,6 +34,7 @@ trait TestCaseDAO extends ModelCompanion[TestCase, ObjectId] {
   def all(): List[TestCase] = dao.find(MongoDBObject.empty).toList
   def findByBuildNumber(buildNumber: Long): List[TestCase] = dao.find(MongoDBObject("buildNumber" -> buildNumber)).toList
   def findByStatus(status: String) = dao.find(MongoDBObject("status.name" -> status)).toList
+  def findByBuildAndStatus(build: Int, status: String) = dao.find(MongoDBObject("buildNumber" -> build, "status.name" -> status))
 //  def findByCountry(country: String) = dao.find(MongoDBObject("address.1country" -> country))
 //  def authenticate(username: String, password: String): Option[User] = findOne(DBObject("username" -> username, "password" -> password))
 
