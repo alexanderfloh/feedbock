@@ -50,8 +50,7 @@
       </div>
     </div>
     <div class="container">
-        <form class="form-horizontal span5">
-        @helper.form(action = routes.Application.submit, 'class -> "form-horizontal span6") {
+        @helper.form(action = routes.Application.submitFeedback(testCase.suiteName, testCase.className, testCase.testName), 'class -> "form-horizontal span6") {
 			<fieldset>
 				<div class="control-group">
 					<label class="control-label">Build Number</label>
@@ -81,7 +80,7 @@
 					<label class="control-label">Defect</label>
 					<div class="controls">
 						<label class="checkbox">
-							<input type="checkbox" class="input-block-level" required>
+							@helper.checkbox(feedbackForm("defect"))
 						</label>
 					</div>
 				</div>
@@ -89,7 +88,7 @@
 					<label class="control-label">Code Change</label>
 					<div class="controls">
 						<label class="checkbox">
-							<input type="checkbox" class="input-block-level" required>
+							@helper.checkbox(feedbackForm("codeChange"))
 						</label>
 					</div>
 				</div>
@@ -97,14 +96,14 @@
 					<label class="control-label">Timing</label>
 					<div class="controls">
 						<label class="checkbox">
-							<input type="checkbox" class="input-block-level" required>
+							@helper.checkbox(feedbackForm("timing"))
 						</label>
 					</div>
 				</div>
+				@helper.textarea(feedbackForm("comment"))
+				<input type="submit" />
 			</fieldset>
 			}
-		</form>
-		
 		<div class="row">
 			<h2 class="span5">History</h2>
 			@history.map { entry =>

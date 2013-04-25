@@ -7,6 +7,7 @@ import play.api.mvc._
 import models._
 import results.{ Results, Build }
 import views.html.defaultpages.badRequest
+import org.joda.time.DateTime
 
 object Application extends Controller {
 
@@ -44,10 +45,18 @@ object Application extends Controller {
     Ok(testcases.toList.mkString("\n"))
   }
   
-  def submit = Action { implicit request =>
+  def submitFeedback(suite: String, className: String, test: String) = Action { implicit request =>
     val(defect, codeChange, timing, comment) = feedbackForm.bindFromRequest.get
     
-    Ok("")
+    val results = TestCase.findBySuiteClassAndTest(suite, className, test)
+    val firstResult = results.head
+    
+    val mostRecentBuild = MetaInformation.findByKey("mostRecentBuildNumber").map(_.toInt).getOrElse(0)
+    val additionalData = Map("defect" -> defect, "codeChange" -> codeChange, "timing" -> timing).map{case (key, value) => (key, value.toString)}
+    val history = TestCaseHistory(mostRecentBuild, className, suite, test, comment, DateTime.now, additionalData)
+    TestCaseHistory.insert(history)
+    
+    Ok(views.html.testCaseDetails(firstResult, TestCaseHistory.getHistoryByTestCase(firstResult), feedbackForm))
   }
   
   val feedbackForm = Form(
