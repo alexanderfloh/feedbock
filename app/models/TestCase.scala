@@ -7,7 +7,6 @@ import com.novus.salat.dao._
 import com.mongodb.casbah.Imports._
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
-
 import se.radley.plugin.salat._
 import se.radley.plugin.salat.Binders._
 import mongoContext._
@@ -36,6 +35,8 @@ trait TestCaseDAO extends ModelCompanion[TestCase, ObjectId] {
   def findByStatus(status: String) = dao.find(MongoDBObject("status.name" -> status)).toList
   def findByBuildAndStatus(build: Int, status: String) = dao.find(MongoDBObject("buildNumber" -> build, "status.name" -> status))
 //  def findByCountry(country: String) = dao.find(MongoDBObject("address.1country" -> country))
+  def getById(id: String) = dao.findOneById(new ObjectId(id))
+  //  def findByCountry(country: String) = dao.find(MongoDBObject("address.1country" -> country))
 //  def authenticate(username: String, password: String): Option[User] = findOne(DBObject("username" -> username, "password" -> password))
 
  

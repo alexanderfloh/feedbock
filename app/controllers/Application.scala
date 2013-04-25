@@ -4,6 +4,7 @@ import play.api._
 import play.api.mvc._
 import models._
 import results.{Results, Build}
+import views.html.defaultpages.badRequest
 
 object Application extends Controller {
 
@@ -21,8 +22,13 @@ object Application extends Controller {
     result.getOrElse(BadRequest("unable to access jenkins"))
 
   }
-
-  def viewDetails(id: String) = TODO
+  
+  def viewDetails(id: String) = Action {
+    TestCase.getById(id).map{ tc =>
+      Ok(views.html.testCaseDetails(tc))
+      }.getOrElse(NotFound(""))
+    
+  }
 
   def isNewBuildAvailable = {
     val optResult = for {
