@@ -80,7 +80,7 @@
 					<label class="control-label">Defect</label>
 					<div class="controls">
 						<label class="checkbox">
-							<input type="checkbox" class="input-block-level" required>
+							@helper.checkbox(feedbackForm("defect"))
 						</label>
 					</div>
 				</div>
@@ -88,7 +88,7 @@
 					<label class="control-label">Code Change</label>
 					<div class="controls">
 						<label class="checkbox">
-							<input type="checkbox" class="input-block-level" required>
+							@helper.checkbox(feedbackForm("codeChange"))
 						</label>
 					</div>
 				</div>
@@ -96,7 +96,7 @@
 					<label class="control-label">Timing</label>
 					<div class="controls">
 						<label class="checkbox">
-							<input type="checkbox" class="input-block-level" required>
+							@helper.checkbox(feedbackForm("timing"))
 						</label>
 					</div>
 				</div>
