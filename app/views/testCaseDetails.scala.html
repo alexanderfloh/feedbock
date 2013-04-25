@@ -50,10 +50,8 @@
       </div>
     </div>
     <div class="container">
-        <form class="form-horizontal span6">
+        <form class="form-horizontal span5">
 			<fieldset>
-				<legend>Test Case Details</legend>
-
 				<div class="control-group">
 					<label class="control-label">Build Number</label>
 					<div class="controls">
@@ -104,7 +102,15 @@
 				</div>
 			</fieldset>
 		</form>
-      
+		
+		<div class="row">
+			<h2 class="span5">History</h2>
+			@history.map { entry =>
+				<div class="span5">
+					@entry.comment
+				</div>
+			}
+      	</div>
       <!-- 
       
        "_id" : ObjectId("517833e803648d88302bb420"), "buildNumber" : NumberLong(1234), "testName" : "test1", "className" : "class1j", "suiteName" : "suite1", "configurationName" : "Win 7 config", "status" : { "name" : "Passed" }
