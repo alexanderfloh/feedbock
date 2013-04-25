@@ -62,7 +62,7 @@ object Application extends Controller {
     val history = TestCaseHistory(mostRecentBuild, className, suite, test, comment, DateTime.now, additionalData)
     TestCaseHistory.insert(history)
     
-    Ok(views.html.testCaseDetails(firstResult, TestCaseHistory.getHistoryByTestCase(firstResult), feedbackForm, configurationNames))
+    Redirect(routes.Application.viewDetails(suite, className, test))
   }
   
   val feedbackForm = Form(
