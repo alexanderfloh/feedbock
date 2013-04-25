@@ -39,8 +39,13 @@ trait TestCaseDAO extends ModelCompanion[TestCase, ObjectId] {
   def getById(id: String) = dao.findOneById(new ObjectId(id))
   //  def findByCountry(country: String) = dao.find(MongoDBObject("address.1country" -> country))
 //  def authenticate(username: String, password: String): Option[User] = findOne(DBObject("username" -> username, "password" -> password))
-  def findBySuiteClassAndTest(suite: String, clazz: String, test: String): List[TestCase] =
-    dao.find(MongoDBObject("suiteName" -> suite, "className" -> clazz, "testName" -> test)).toList
+  def findBySuiteClassAndTest(suite: String, clazz: String, test: String): List[TestCase] = {
+    // find highest build number
+    val cursor = dao.find(MongoDBObject("suiteName" -> suite, "className" -> clazz, "testName" -> test))
+    .sort(orderBy = MongoDBObject("buildNumber" -> -1));
+    val testCase = cursor.next();
+    dao.find(MongoDBObject("suiteName" -> suite, "className" -> clazz, "testName" -> test, "buildNumber" -> testCase.buildNumber)).toList
+  }
 }
 
 /**
