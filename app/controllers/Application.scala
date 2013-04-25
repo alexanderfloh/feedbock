@@ -6,9 +6,12 @@ import models._
 import views.html.defaultpages.badRequest
 
 object Application extends Controller {
-  
+
   def index = Action {
-    Ok(views.html.index(TestCase.all))
+    val passedCount = TestCase.findByStatus("Passed").size
+    val testcases = TestCase.findByStatus("Failed")
+    val grouped = testcases.groupBy(_.testName).toList.sortBy{x => x._2.size}.reverse
+    Ok(views.html.index(passedCount, grouped))
   }
   
   def viewDetails(id: String) = Action {
@@ -17,16 +20,12 @@ object Application extends Controller {
       }.getOrElse(NotFound(""))
     
   }
-  
+
   def load(buildNumber: Int) = Action {
     val testcases = results.Results.loadResultsForBuild(
-        results.Build(buildNumber, "http://lnz-bobthebuilder/hudson/job/Trigger%20BVT%20Testset%20AllInOne/" + buildNumber + "/"))
+      results.Build(buildNumber, "http://lnz-bobthebuilder/hudson/job/Trigger%20BVT%20Testset%20AllInOne/" + buildNumber + "/"))
     testcases.foreach(TestCase.save _)
-    Ok(views.html.index(testcases.toList))
-  }
-  
-  def bla(status: String) = Action {
-    Ok(views.html.index(TestCase.findByStatus(status)))
+    Ok(testcases.toList.mkString("\n"))
   }
 
 }
