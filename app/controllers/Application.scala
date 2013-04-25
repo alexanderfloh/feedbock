@@ -26,14 +26,18 @@ object Application extends Controller {
   
   def viewDetailsById(id: String) = Action {
     TestCase.getById(id).map{ tc =>
-      Ok(views.html.testCaseDetails(tc))
+      Ok(views.html.testCaseDetails(tc, null))
     }.getOrElse(NotFound(""))
 
   }
 
   def viewDetails(suite: String, clazz: String, test: String) = Action {
     val results = TestCase.findBySuiteClassAndTest(suite, clazz, test)
-    Ok(views.html.testCaseDetails(results.head))
+    
+    val firstResult = results.head
+    val history = TestCaseHistory.getHistoryByTestCase(firstResult)
+    
+    Ok(views.html.testCaseDetails(firstResult, history))
     
   }
 

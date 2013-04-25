@@ -14,6 +14,8 @@ object Global extends GlobalSettings {
   override def onStart(app: Application) {
     val actor = Akka.system.actorOf(Props[TestResultLoadActor], name = "testResultLoadActor")
     Akka.system.scheduler.schedule(5.seconds, 5.minutes, actor, actors.LoadResult)
+    
+    TestCaseHistory.insert(TestCaseHistory(1234, "class1", "suite1", "test1", "Oje"))
   }
 
   override def onStop(app: Application) {

@@ -20,5 +20,8 @@ object TestCaseHistory extends ModelCompanion[TestCaseHistory, ObjectId] {
   def collection = mongoCollection("testCaseHistory")
   val dao = new SalatDAO[TestCaseHistory, ObjectId](collection) {}
   
+  def getHistoryByTestCase(testCase: TestCase) :List[TestCaseHistory] = {
+    dao.find(MongoDBObject("testName" -> testCase.testName)).toList
+  }
   
 }
