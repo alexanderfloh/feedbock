@@ -21,18 +21,17 @@
 				for (var member in val) {
 					var currentVal = reducedVal[member] || 0;
 					currentVal += val[member];
-					val[member] = currentVal;
 					reducedVal[member] = currentVal;
 				}
 			});
 			return reducedVal;
 		},
 		finalize: function(key, reducedVal) {
-			var passed = reducedVal.passed || 0;
-			var failed = reducedVal.failed || 0;
-			reducedVal.sum = passed + failed;
+			reducedVal.passed = reducedVal.passed || 0;
+			reducedVal.failed = reducedVal.failed || 0;
+			reducedVal.sum = reducedVal.passed + reducedVal.failed;
 			var factor = reducedVal.sum / 100;
-			reducedVal.failedPercent = failed / factor;
+			reducedVal.failedPercent = reducedVal.failed / factor;
 			return reducedVal;
 		}
 	};
