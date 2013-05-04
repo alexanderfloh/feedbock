@@ -11,8 +11,8 @@
 			};
 			var value = {};
 			value[statusMapper[this.status.name]] = 1;
-			//emit({suite: this.suiteName, build: this.buildNumber}, value);
 			emit({suite: this.suiteName}, value);
+			//emit({suite: this.suiteName, build: this.buildNumber}, value);
 			//emit({suite: "all"}, value);
 		},
 		reduce: function(key, values) {
@@ -30,8 +30,19 @@
 			reducedVal.passed = reducedVal.passed || 0;
 			reducedVal.failed = reducedVal.failed || 0;
 			reducedVal.sum = reducedVal.passed + reducedVal.failed;
-			var factor = reducedVal.sum / 100;
-			reducedVal.failedPercent = reducedVal.failed / factor;
+			if (reducedVal.passed === reducedVal.sum) {
+				// prevent calculation errors and set 0% failed and 100% passed
+				reducedVal.failedPercent = 0;
+				reducedVal.passedPercent = 100;
+			} else if (reducedVal.failed === reducedVal.sum) {
+				// prevent calculation errors and set 100% failed and 0% passed
+				reducedVal.failedPercent = 100;
+				reducedVal.passedPercent = 0;
+			} else {
+				var factor = reducedVal.sum / 100;
+				reducedVal.failedPercent = reducedVal.failed / factor;
+				reducedVal.passedPercent = reducedVal.passed / factor;				
+			}
 			return reducedVal;
 		}
 	};
