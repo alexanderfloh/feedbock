@@ -9,7 +9,8 @@ import play.api._
 case class Build(number: Int, url: String)
 
 object Results {
-  val hostName = "http://lnz-bobthebuilder/hudson/"
+  val hostName = Play.current.configuration.getString("jenkins.hostName")
+  val xmlApiSuffix = Play.current.configuration.getString("jenkins.xmlApiSuffix");
 
   def fromUrl(url: String) = {
     val connection = new URL(url).openConnection()
@@ -47,7 +48,7 @@ object Results {
   def findRootTriggerBuild(buildUrl: String): Build = {
     findRootTriggerBuildRec(Build(0, buildUrl))
   }
-  
+
   private def findRootTriggerBuildRec(build: Build) : Build = {
     findTriggeringBuild(build.url) match {
       case None => build
@@ -73,7 +74,7 @@ object Results {
   }
 
   def findMostRecentBuild(jobUrl: String) = {
-    val buildsXml = XML.load(fromUrl(hostName + "job/Trigger%20BVT%20Testset%20AllInOne/api/xml"))
+    val buildsXml = XML.load(fromUrl(hostName.get + xmlApiSuffix.get))
     val mostRecentBuild = (buildsXml \\ "build").headOption
     mostRecentBuild.map(node => {
       val numberNode = node \ "number"
@@ -85,7 +86,7 @@ object Results {
   }
 
   def loadBuilds() = {
-    val buildsXml = XML.load(fromUrl(hostName + "job/Trigger%20BVT%20Testset%20AllInOne/api/xml"))
+    val buildsXml = XML.load(fromUrl(hostName.get + xmlApiSuffix.get))
     val buildNodes = buildsXml \\ "build"
     val builds = buildNodes.map(node => {
       val numberNode = node \ "number"

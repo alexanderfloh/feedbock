@@ -1,17 +1,16 @@
 package controllers
 
-import play.api._
 import play.api.data._
 import play.api.data.Forms._
 import play.api.mvc._
 import models._
 import results.{ Results, Build }
-import views.html.defaultpages.badRequest
 import org.joda.time.DateTime
+import play.api.Play
 
 object Application extends Controller {
 
-  val jobUrl = "http://lnz-bobthebuilder/hudson/job/Trigger%20BVT%20Testset%20AllInOne/"
+  val jobUrl = Play.current.configuration.getString("jenkins.jobUrl")
 
   def index = Action {
     val mostRecentBuild = MetaInformation.findByKey("mostRecentBuildNumber")
@@ -39,9 +38,9 @@ object Application extends Controller {
   }
 
   def loadBuild(buildNumber: Int) = Action {
-    val triggeringBuild = Results.findRootTriggerBuild(jobUrl + "/" + buildNumber.toString)
+    val triggeringBuild = Results.findRootTriggerBuild(jobUrl.get + "/" + buildNumber.toString)
 
-    val testcases = Results.loadResultsForBuild(Build(buildNumber, jobUrl + "/" + buildNumber.toString), triggeringBuild.number)
+    val testcases = Results.loadResultsForBuild(Build(buildNumber, jobUrl.get + "/" + buildNumber.toString), triggeringBuild.number)
     testcases.foreach(TestCase.save _)
     Ok(testcases.toList.mkString("\n"))
   }
