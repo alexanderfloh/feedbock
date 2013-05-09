@@ -59,6 +59,11 @@ object Application extends Controller {
     TestCaseHistory.insert(history)
     Redirect(routes.Application.viewDetails(suite, className, test))
   }
+  
+  def calc = Action {
+    
+    Ok(TestCaseHistory.calculateScore.toString())
+  }
 
   val feedbackForm = Form(
     tuple(

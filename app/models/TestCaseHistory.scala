@@ -99,17 +99,17 @@ object TestCaseHistory extends ModelCompanion[TestCaseHistory, ObjectId] {
 			if (reducedVal.historyScore > 0) {
 				return reducedVal;
 			}
-			return null;
+			return 0;
 		}"""
 
   def calculateScore() = {
-    MapReduceCommand(
+    val mrc = MapReduceCommand(
       input = "testCases",
       map = map,
       reduce = reduce,
       finalizeFunction = Some(finalizeFunction),
       output = MapReduceInlineOutput)
-      .toDBObject
+   collection.mapReduce(mrc).toList   
   }
 }
 
