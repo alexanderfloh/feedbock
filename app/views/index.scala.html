@@ -68,10 +68,15 @@
 		      <article>
 		      	<h2><a href="/details/@testCases.head.suiteName/@testCases.head.className/@testCases.head.testName">@tcName</a></h2>
 		      	<section>
-		      	Class: @testCases.head.className</br>
-		      	Suite: @testCases.head.suiteName</br>
+		      	Full name: <b>@testCases.head.suiteName</b>/@Html("<wbr>")
+		      	<b>@testCases.head.className</b>/@Html("<wbr>")
+		      	<b>@testCases.head.testName</b>
+		      	</br>
+		      	<span class="scorebox pull-right">12<p>Score</p></span>
 		      	Test failed on 
+		      	<div>
 		      	@testCases.map{ tc =>  <span class="label label-info">@tc.configurationName</span> }
+		      	</div>
 		      	</section>
 		      </article>
 		      }
