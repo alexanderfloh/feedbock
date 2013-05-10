@@ -17,10 +17,13 @@ object Application extends Controller {
     val result = for {
       build <- mostRecentBuild
     } yield {
+      val history = BuildHistory.all.takeRight(6)
+      val builds = history.map(_.buildNumber)
+      val passedTests = history.map(_.value("passedTests"))
       val failed = TestCase.findByBuildAndStatus(build.toInt, "Failed").toList
       val passedCount = TestCase.findByBuildAndStatus(build.toInt, "Passed").size
       val grouped = failed.groupBy(_.testName).toList.sortBy { x => x._2.size }.reverse
-      Ok(views.html.index(passedCount, build.toInt, grouped))
+      Ok(views.html.index(passedCount, build.toInt, grouped, builds, passedTests))
     }
     result.getOrElse(BadRequest("unable to access jenkins"))
 
@@ -47,7 +50,7 @@ object Application extends Controller {
     val results = TestCase.findBySuiteClassAndTest(suite, clazz, test)
 
     val firstResult = results.head
-    
+
     val configurationNames = results.map(entry => (entry.configurationName, entry.status))
     val history = TestCaseHistory.getHistoryByTestCase(firstResult)
 
@@ -69,14 +72,14 @@ object Application extends Controller {
     val firstResult = results.head
 
     val configurationNames = results.map(entry => (entry.configurationName, entry.status))
-    
+
     val mostRecentBuild = MetaInformation.findByKey("mostRecentBuildNumber").map(_.toInt).getOrElse(0)
     val additionalData = Map("defect" -> defect, "codeChange" -> codeChange, "timing" -> timing).map { case (key, value) => (key, value.toString) }
     val history = TestCaseHistory(mostRecentBuild, className, suite, test, comment, DateTime.now, additionalData)
     TestCaseHistory.insert(history)
     Redirect(routes.Application.viewDetails(suite, className, test))
   }
-  
+
   def calc = Action {
     Ok(TestCase.countByStatus().mkString)
   }
