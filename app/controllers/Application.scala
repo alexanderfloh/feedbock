@@ -12,6 +12,20 @@ object Application extends Controller {
 
   val jobUrl = Play.current.configuration.getString("jenkins.jobUrl")
 
+  def importFromCISystem = Action {
+    val mostRecentBuild = MetaInformation.findByKey("mostRecentBuildNumber")
+    val result = for {
+      build <- mostRecentBuild
+    } yield {
+      val failed = TestCase.findByBuildAndStatus(build.toInt, "Failed").toList
+      val passedCount = TestCase.findByBuildAndStatus(build.toInt, "Passed").size
+      val grouped = failed.groupBy(_.testName).toList.sortBy { x => x._2.size }.reverse
+      Ok(views.html.index(passedCount, build.toInt, grouped))
+    }
+    result.getOrElse(BadRequest("unable to access jenkins"))
+
+  }
+
   def index = Action {
     val mostRecentBuild = MetaInformation.findByKey("mostRecentBuildNumber")
     val result = for {
