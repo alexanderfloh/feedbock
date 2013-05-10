@@ -1,4 +1,9 @@
-@(passedCount: Int, currentBuild: Int, testCases: List[(String, Seq[TestCase])])
+@(passedCount: Int, 
+  currentBuild: Int, 
+  testCases: List[(String, Seq[TestCase])], 
+  builds: List[Int], 
+  passedTests: List[Int])
+  
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -59,7 +64,10 @@
       <div class="row">
 	      <div class="span4">
 	      	<div class="hero-unit"><h1>You're doing well!</h1><p>
-	      	<span class="text-info">@passedCount</span> tests passed for build <span class="text-info">@currentBuild.</span></p></div>
+	      	<span class="text-info">@passedCount</span> tests passed for build <span class="text-info">@currentBuild.</span></p>
+	      	@buildHistory(builds, passedTests)
+	      	
+	      	</div>
 	      </div>
 	      
 	      <div class="span8">

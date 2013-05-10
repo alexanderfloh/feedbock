@@ -11,6 +11,8 @@ import se.radley.plugin.salat._
 import se.radley.plugin.salat.Binders._
 import mongoContext._
 import com.mongodb.casbah.commons.MongoDBObject
+import utils.MapReduceFunctionLoader
+import com.mongodb.casbah.map_reduce.MapReduceStandardOutput
 
 case class TestCase(
   id: ObjectId,
@@ -35,19 +37,32 @@ trait TestCaseDAO extends ModelCompanion[TestCase, ObjectId] {
   def findByBuildNumber(buildNumber: Long): List[TestCase] = dao.find(MongoDBObject("buildNumber" -> buildNumber)).toList
   def findByStatus(status: String) = dao.find(MongoDBObject("status.name" -> status)).toList
   def findByBuildAndStatus(build: Int, status: String) = dao.find(MongoDBObject("buildNumber" -> build, "status.name" -> status))
-//  def findByCountry(country: String) = dao.find(MongoDBObject("address.1country" -> country))
   def getById(id: String) = dao.findOneById(new ObjectId(id))
-  //  def findByCountry(country: String) = dao.find(MongoDBObject("address.1country" -> country))
-//  def authenticate(username: String, password: String): Option[User] = findOne(DBObject("username" -> username, "password" -> password))
+
   def findBySuiteClassAndTest(suite: String, clazz: String, test: String): List[TestCase] = {
     // find highest build number
-    val cursor = dao.find(MongoDBObject("suiteName" -> suite, "className" -> clazz, "testName" -> test))
-    .sort(orderBy = MongoDBObject("buildNumber" -> -1));
+    val cursor = dao.find(MongoDBObject(
+      "suiteName" -> suite,
+      "className" -> clazz,
+      "testName" -> test))
+      .sort(orderBy = MongoDBObject("buildNumber" -> -1));
     if (!cursor.hasNext) {
       throw new RuntimeException("no data");
     }
     val testCase = cursor.next();
     dao.find(MongoDBObject("suiteName" -> suite, "className" -> clazz, "testName" -> test, "buildNumber" -> testCase.buildNumber)).toList
+  }
+
+  def countByStatus() = {
+    val countByStatusFunctions = MapReduceFunctionLoader("feedbockJS", "countByStatus")
+    val mrc = MapReduceCommand(
+      input = "testCases",
+      map = countByStatusFunctions.map,
+      reduce = countByStatusFunctions.reduce,
+      finalizeFunction = None,
+      verbose = true,
+      output = MapReduceStandardOutput("buildHistory"))
+    collection.mapReduce(mrc).toList
   }
 }
 

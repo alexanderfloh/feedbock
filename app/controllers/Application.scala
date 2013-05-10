@@ -13,6 +13,9 @@ object Application extends Controller {
   val jobUrl = Play.current.configuration.getString("jenkins.jobUrl")
 
   def index = Action {
+    val history = BuildHistory.all.takeRight(6)
+    val builds = history.map(_.buildNumber)
+    val passedTests = history.map(_.value("passedTests"))
     val mostRecentBuild = MetaInformation.findByKey("mostRecentBuildNumber")
     val result = for {
       build <- mostRecentBuild
@@ -20,7 +23,7 @@ object Application extends Controller {
       val failed = TestCase.findByBuildAndStatus(build.toInt, "Failed").toList
       val passedCount = TestCase.findByBuildAndStatus(build.toInt, "Passed").size
       val grouped = failed.groupBy(_.testName).toList.sortBy { x => x._2.size }.reverse
-      Ok(views.html.index(passedCount, build.toInt, grouped))
+      Ok(views.html.index(passedCount, build.toInt, grouped, builds, passedTests))
     }
     result.getOrElse(BadRequest("unable to access jenkins"))
 
@@ -61,8 +64,7 @@ object Application extends Controller {
   }
   
   def calc = Action {
-    
-    Ok(TestCaseHistory.calculateScore.toString())
+    Ok(TestCase.countByStatus().mkString)
   }
 
   val feedbackForm = Form(
