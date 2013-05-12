@@ -11,6 +11,7 @@ GET     /details/:suite/:clazz/:test controllers.Application.viewDetails(suite: 
 
 GET     /loadBuild/:buildNumber controllers.Application.loadBuild(buildNumber: Int)
 GET     /calc controllers.Application.calc
+GET		/calcScores controllers.Application.calcScores
 
 POST    /submitFeedback/:suite/:className/:test controllers.Application.submitFeedback(suite: String, className: String, test: String)
 

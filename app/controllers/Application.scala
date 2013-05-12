@@ -84,6 +84,10 @@ object Application extends Controller {
     Ok(TestCase.countByStatus().mkString)
   }
 
+  def calcScores = Action {
+    Ok(TestCaseHistory.calculateScore.mkString)
+  }
+
   val feedbackForm = Form(
     tuple(
       "defect" -> boolean,

@@ -45,11 +45,11 @@ object TestCaseHistory extends ModelCompanion[TestCaseHistory, ObjectId] {
       .sort(orderBy = MongoDBObject("timestamp" -> -1)).toList
   }
 
-  val calculateHistoryScore = MapReduceFunctionLoader("feedbockJS", "calculateHistoryScore")
 
   def calculateScore() = {
+    val calculateHistoryScore = MapReduceFunctionLoader("feedbockJS", "calculateHistoryScore")
     val mrc = MapReduceCommand(
-      input = "testCases",
+      input = "testCaseHistory",
       map = calculateHistoryScore.map,
       reduce = calculateHistoryScore.reduce,
       finalizeFunction = Some(calculateHistoryScore.finalizeFunction),

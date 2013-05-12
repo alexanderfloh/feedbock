@@ -1,29 +1,23 @@
 function() {
-			var statusMapper = {
-				"Passed": "passed",
-				"Failed": "failed",
-				"Fixed": "passed",
-				"Regression": "failed"
-			};
-			
-			var value = {
-				builds: {
-					passed: [],
-					failed: []
-				}
-			};
-			
-			switch(statusMapper[this.status.name]) {
-				case "passed":
-					value.builds.passed.push(this.buildNumber);
-					break;
-				case "failed":
-					value.builds.failed.push(this.buildNumber);
-					break;
-			}
-			emit({
-				suite: this.suiteName,
-				clazz: this.className,
-				test: this.testName
-			}, value);
-		}
+	value = {
+	  defect : 0,
+	  codeChange : 0,
+	  timing: 0
+	};
+	
+	if(this.additionalData.defect == "true") {
+		value.defect = 1;
+	}
+	if(this.additionalData.codeChange == "true") {
+		value.codeChange = 1;
+	}
+	if(this.additionalData.timing == "true") {
+		value.timing = 1;
+	}
+	
+	emit({
+		suiteName: this.suiteName,
+		className: this.className,
+		testName: this.testName
+	}, value);
+}

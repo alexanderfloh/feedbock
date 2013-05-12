@@ -1,21 +1,16 @@
 function(key, values) {
 			var reducedVal = {
-				builds: {
-					passed: [],
-					failed: []
-				}
+			  defect : 0,
+			  codeChange : 0,
+			  timing: 0
 			};
 			values.forEach(function(val) {
-				val.builds.passed.forEach(function(build) {
-					if (reducedVal.builds.passed.indexOf(build) < 0) {
-						reducedVal.builds.passed.push(build);
-					}
-				});
-				val.builds.failed.forEach(function(build) {
-					if (reducedVal.builds.failed.indexOf(build) < 0) {
-						reducedVal.builds.failed.push(build);
-					}
-				});
+				reducedVal.defect += val.defect;
+				reducedVal.codeChange += val.codeChange;
+				reducedVal.timing += val.timing;
+			  //Object.keys(val).forEach(function(key){
+			//	 reducedVal[key] += val[key]; 
+			 // });
 			});
 			return reducedVal;
 		}
