@@ -9,8 +9,8 @@ import play.api._
 case class Build(number: Int, url: String)
 
 object Results {
-  val hostName = Play.current.configuration.getString("jenkins.hostName")
-  val xmlApiSuffix = Play.current.configuration.getString("jenkins.xmlApiSuffix");
+  val hostName = Play.current.configuration.getString("jenkins.hostName").getOrElse("http://localhost")
+  val xmlApiSuffix = Play.current.configuration.getString("jenkins.xmlApiSuffix").getOrElse("")
 
   def fromUrl(url: String) = {
     val connection = new URL(url).openConnection()
@@ -74,7 +74,7 @@ object Results {
   }
 
   def findMostRecentBuild(jobUrl: String) = {
-    val buildsXml = XML.load(fromUrl(hostName.get + xmlApiSuffix.get))
+    val buildsXml = XML.load(fromUrl(hostName + xmlApiSuffix))
     val mostRecentBuild = (buildsXml \\ "build").headOption
     mostRecentBuild.map(node => {
       val numberNode = node \ "number"
@@ -86,7 +86,7 @@ object Results {
   }
 
   def loadBuilds() = {
-    val buildsXml = XML.load(fromUrl(hostName.get + xmlApiSuffix.get))
+    val buildsXml = XML.load(fromUrl(hostName + xmlApiSuffix))
     val buildNodes = buildsXml \\ "build"
     val builds = buildNodes.map(node => {
       val numberNode = node \ "number"
