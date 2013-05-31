@@ -20,10 +20,10 @@ object Application extends Controller {
     val result = for {
       build <- mostRecentBuild
     } yield {
-      val passedCount = TestCase.findByBuildAndStatus(build.toInt, "Passed").size
-      val failed = TestCase.findByBuildAndStatus(build.toInt, "Failed").toList
+      val passedCount = 10// TestCase.findByBuildAndStatus(build.toInt, "Passed").size
+      val failed = List[TestCase]() // TestCase.findByBuildAndStatus(build.toInt, "Failed").toList
       val scores = TestCaseScore.all
-      val grouped = failed.groupBy(_.testCaseKey).toList
+      val grouped = failed.groupBy(_.id).toList
       val groupedWithScores = grouped.map {
         case (key, testcases) => {
           val score = scores.find(_.id == key)
@@ -38,14 +38,15 @@ object Application extends Controller {
   }
 
   def viewDetails(suite: String, clazz: String, test: String) = Action {
-    val results = TestCase.findByKey(TestCaseKey(suite, clazz, test))
-
-    val firstResult = results.head
-
-    val configurationNames = results.map(entry => (entry.configurationName, entry.status))
-    val history = TestCaseHistory.getHistoryByTestCase(firstResult.testCaseKey)
-
-    Ok(views.html.testCaseDetails(firstResult, history, feedbackForm, configurationNames))
+    val action = for {
+      mostRecentBuild <- MetaInformation.findByKey("mostRecentBuildNumber")
+      testcase <- TestCase.findOneById(TestCaseKey(suite, clazz, test))
+    } yield {
+      val failedConfigs = testcase.configurations.filter(configuration => configuration.failed.contains(mostRecentBuild))
+      val history = testcase.feedback
+      Ok(views.html.testCaseDetails(testcase.id, mostRecentBuild.toInt, history.toList, feedbackForm, failedConfigs.toList))
+    }
+    action.getOrElse(NotFound("testcase not found"))
   }
 
   def loadBuild(buildNumber: Int) = Action {
@@ -59,19 +60,20 @@ object Application extends Controller {
   def submitFeedback(suite: String, className: String, test: String) = Action { implicit request =>
     val (defect, codeChange, timing, comment) = feedbackForm.bindFromRequest.get
 
-    val results = TestCase.findByKey(TestCaseKey(suite, className, test))
-    val firstResult = results.head
+    val action = for {
+      testcase <- TestCase.findOneById(TestCaseKey(suite, className, test))
+    } yield {
+      val mostRecentBuild = MetaInformation.findByKey("mostRecentBuildNumber").map(_.toInt).getOrElse(0)
+      val additionalData = Map(
+        "defect" -> defect,
+        "codeChange" -> codeChange,
+        "timing" -> timing).map { case (key, value) => (key, value.toString) }
+      val history = TestCaseHistory(mostRecentBuild, className, suite, test, comment, DateTime.now, additionalData)
+      TestCaseHistory.insert(history)
+      Redirect(routes.Application.viewDetails(suite, className, test))
 
-    val configurationNames = results.map(entry => (entry.configurationName, entry.status))
-
-    val mostRecentBuild = MetaInformation.findByKey("mostRecentBuildNumber").map(_.toInt).getOrElse(0)
-    val additionalData = Map(
-      "defect" -> defect,
-      "codeChange" -> codeChange,
-      "timing" -> timing).map { case (key, value) => (key, value.toString) }
-    val history = TestCaseHistory(mostRecentBuild, className, suite, test, comment, DateTime.now, additionalData)
-    TestCaseHistory.insert(history)
-    Redirect(routes.Application.viewDetails(suite, className, test))
+    }
+    action.getOrElse(NotFound("testcase not found"))
   }
 
   def calc = Action {

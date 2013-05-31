@@ -76,14 +76,14 @@
 		      <article>
 		      	<h2><a href="/details/@tcKey.toUrlPart">@tcKey.testName</a></h2>
 		      	<section>
-		      	Full name: <b>@testCases.head.suiteName</b>/@Html("<wbr>")
-		      	<b>@testCases.head.className</b>/@Html("<wbr>")
-		      	<b>@testCases.head.testName</b>
+		      	Full name: <b>@tcKey.suiteName</b>/@Html("<wbr>")
+		      	<b>@tcKey.className</b>/@Html("<wbr>")
+		      	<b>@tcKey.testName</b>
 		      	</br>
 		      	<span class="scorebox pull-right">@score<p>Score</p></span>
 		      	Test failed on 
 		      	<div>
-		      	@testCases.map{ tc =>  <span class="label label-info">@tc.configurationName</span> }
+		      	@testCases.map{ tc =>  <span class="label label-info">TODO: tc.configurationName</span> }
 		      	</div>
 		      	</section>
 		      </article>

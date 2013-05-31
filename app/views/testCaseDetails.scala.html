@@ -1,4 +1,4 @@
-@(testCase: TestCase, history: List[TestCaseHistory], feedbackForm: Form[(Boolean, Boolean, Boolean, String)], configurations: List[(String, models.TestStatus)])
+@(testCase: TestCaseKey, mostRecentBuild: Int, history: List[TestCaseFeedback], feedbackForm: Form[(Boolean, Boolean, Boolean, String)], configurations: List[TestCaseConfiguration])
 @import helper._
 
 <!DOCTYPE html>
@@ -55,7 +55,7 @@
         @helper.form(action = routes.Application.submitFeedback(testCase.suiteName, testCase.className, testCase.testName), 'class -> "form-horizontal span6") {
         	<ul>
         		@configurations.map { entry =>
-        			<li>@entry._1, @entry._2.name</li>
+        			<li>@entry.name, Failed</li>
         		}
         	</ul>
 			<fieldset>
@@ -63,7 +63,7 @@
 				<div class="control-group">
 					<label class="control-label">Build Number</label>
 					<div class="controls">
-						<input type="text" class="input-block-level" required readonly="readonly" value="@testCase.buildNumber">
+						<input type="text" class="input-block-level" required readonly="readonly" value="@mostRecentBuild">
 					</div>
 				</div>
 				<div class="control-group">
@@ -130,11 +130,11 @@
 			<h2 class="span5">History</h2>
 			@history.map { entry =>
 				<div class="span5">
-					<span class="badge">@entry.buildNumber</span>
+					<span class="badge">@mostRecentBuild</span>
 					@entry.comment
-					@if(entry.isDefect) { <span class="label label-info">Defect</span> }
-					@if(entry.isCodeChange) { <span class="label label-info">Code Change</span> }
-					@if(entry.isTiming) { <span class="label label-info">Timing issue</span> }
+					@if(entry.defect) { <span class="label label-info">Defect</span> }
+					@if(entry.codeChange) { <span class="label label-info">Code Change</span> }
+					@if(entry.timingIssue) { <span class="label label-info">Timing issue</span> }
 				</div>
 			}
       	</div>

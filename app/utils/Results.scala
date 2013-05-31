@@ -5,6 +5,8 @@ import se.radley.plugin.salat.Binders._
 import models.TestStatus
 import java.net.URL
 import play.api._
+import models.TestCaseKey
+import models.TestCaseConfiguration
 
 case class Build(number: Int, url: String)
 
@@ -41,7 +43,24 @@ object Results {
       val suiteName = classNameSplit.drop(1).headOption.getOrElse("STW")
       val className = if (classNameSplit.length > 1) classNameSplit.drop(2).mkString(".") else testName.text
       val status = tc \ "status"
-      TestCase(new ObjectId(), triggeringBuildNumber, testName.text, className, suiteName, configurationName, TestStatus.fromStringCaseInsensitive(status.text))
+
+      val key = TestCaseKey(suiteName, className, testName.text)
+      val testCase = TestCase.findOneById(key).getOrElse(TestCase(key))
+
+      val config = testCase.configurations.find(_.name == configurationName).getOrElse{
+        val newConfig = TestCaseConfiguration(configurationName)
+        testCase.configurations = testCase.configurations :+ newConfig 
+        newConfig
+      }
+      TestStatus.fromStringCaseInsensitive(status.text) match {
+        case TestStatus("Passed") => config.passed = config.passed :+ triggeringBuildNumber
+        case TestStatus("Fixed") => config.passed = config.passed :+ triggeringBuildNumber
+        case TestStatus("Failed") => config.failed = config.failed :+ triggeringBuildNumber
+        case TestStatus("Regression") => config.failed = config.failed :+ triggeringBuildNumber
+      }
+      
+      TestCase.save(testCase)
+      testCase
     })
   }
 
@@ -49,7 +68,7 @@ object Results {
     findRootTriggerBuildRec(Build(0, buildUrl))
   }
 
-  private def findRootTriggerBuildRec(build: Build) : Build = {
+  private def findRootTriggerBuildRec(build: Build): Build = {
     findTriggeringBuild(build.url) match {
       case None => build
       case Some(triggeringBuild) => findRootTriggerBuildRec(triggeringBuild)
