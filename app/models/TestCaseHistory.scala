@@ -18,6 +18,7 @@ import com.mongodb.casbah.map_reduce.MapReduceStandardOutput
 import com.mongodb.casbah.map_reduce.MapReduceInlineOutput
 import scala.io.Source
 import utils.MapReduceFunctionLoader
+import com.mongodb.casbah.map_reduce.MapReduceCollectionBasedResult
 
 case class TestCaseHistory(
   buildNumber: Int,
@@ -53,7 +54,7 @@ object TestCaseHistory extends ModelCompanion[TestCaseHistory, ObjectId] {
       map = calculateHistoryScore.map,
       reduce = calculateHistoryScore.reduce,
       finalizeFunction = Some(calculateHistoryScore.finalizeFunction),
-      output = MapReduceStandardOutput("testCaseScores"))
+      output = "testCaseScores")
     collection.mapReduce(mrc).toList
   }
 }

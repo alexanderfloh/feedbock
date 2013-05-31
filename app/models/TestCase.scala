@@ -21,6 +21,25 @@ case class TestCaseConfiguration(
     name: String, 
     var passed: List[Int] = List(), 
     var failed: List[Int] = List())
+    
+    
+object TestCaseConfiguration {
+  implicit val testCaseConfigurationJsonWrite = new Writes[TestCaseConfiguration] {
+    def writes(a: TestCaseConfiguration): JsValue = {
+      Json.obj(
+        "name" -> a.name,
+        "passed" -> a.passed,
+        "failed" -> a.failed
+      )
+    }
+  }
+
+  implicit val testCaseConfigurationJsonRead = (
+    (__ \ 'name).read[String] ~
+    (__ \ 'passed).read[List[Int]] ~
+    (__ \ 'failed).read[List[Int]]
+  )(TestCaseConfiguration.apply _)
+}
 
 case class TestCaseFeedback(
     user: String,

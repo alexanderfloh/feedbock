@@ -1,25 +1,25 @@
 function() {
-	value = {
+	var value = {
 	  defect : 0,
 	  codeChange : 0,
 	  timing: 0
 	};
 	
-	if(this.additionalData) {
-		if(this.additionalData.defect == "true") {
-			value.defect = 1;
+	this.feedback.map(function(feedback) {
+		if(feedback.defect) {
+			value.defect += 1;
 		}
-		if(this.additionalData.codeChange == "true") {
-			value.codeChange = 1;
+		if(feedback.codeChange) {
+			value.codeChange += 1;
 		}
-		if(this.additionalData.timing == "true") {
-			value.timing = 1;
+		if(feedback.timingIssue) {
+			value.timing += 1;
 		}
-	}
-	
+	});
+
 	emit({
-		suiteName: this.suiteName,
-		className: this.className,
-		testName: this.testName
+		suiteName: this._id.suiteName,
+		className: this._id.className,
+		testName: this._id.testName
 	}, value);
 }
