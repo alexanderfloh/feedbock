@@ -1,6 +1,6 @@
 @(passedCount: Int, 
   currentBuild: Int, 
-  testCases: List[(String, Seq[TestCase])], 
+  testCases: List[(String, (Seq[TestCase], Int))], 
   builds: List[Int], 
   passedTests: List[Int])
   
@@ -72,7 +72,7 @@
 	      
 	      <div class="span8">
 	      <h1>To improve on that result, consider investigating one of those:</h1>
-		      @testCases.map { case (tcName, testCases) => 
+		      @testCases.map { case (tcName, (testCases, score)) => 
 		      <article>
 		      	<h2><a href="/details/@testCases.head.suiteName/@testCases.head.className/@testCases.head.testName">@tcName</a></h2>
 		      	<section>
@@ -80,7 +80,7 @@
 		      	<b>@testCases.head.className</b>/@Html("<wbr>")
 		      	<b>@testCases.head.testName</b>
 		      	</br>
-		      	<span class="scorebox pull-right">12<p>Score</p></span>
+		      	<span class="scorebox pull-right">@score<p>Score</p></span>
 		      	Test failed on 
 		      	<div>
 		      	@testCases.map{ tc =>  <span class="label label-info">@tc.configurationName</span> }

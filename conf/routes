@@ -2,9 +2,6 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-# URL to trigger import from the CI System (Jenkins)
-GET     /import controllers.Application.importFromCISystem
-
 # Home page
 GET     / controllers.Application.index
 GET     /details/:suite/:clazz/:test controllers.Application.viewDetails(suite: String, clazz: String, test: String)

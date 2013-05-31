@@ -12,23 +12,6 @@ object Application extends Controller {
 
   val jobUrl = Play.current.configuration.getString("jenkins.jobUrl")
 
-  def importFromCISystem = Action {
-    val mostRecentBuild = MetaInformation.findByKey("mostRecentBuildNumber")
-    val result = for {
-      build <- mostRecentBuild
-    } yield {
-      val history = BuildHistory.all.takeRight(6)
-      val builds = history.map(_.buildNumber)
-      val passedTests = history.map(_.value("passedTests"))
-      val failed = TestCase.findByBuildAndStatus(build.toInt, "Failed").toList
-      val passedCount = TestCase.findByBuildAndStatus(build.toInt, "Passed").size
-      val grouped = failed.groupBy(_.testName).toList.sortBy { x => x._2.size }.reverse
-      Ok(views.html.index(passedCount, build.toInt, grouped, builds, passedTests))
-    }
-    result.getOrElse(BadRequest("unable to access jenkins"))
-
-  }
-
   def index = Action {
     val history = BuildHistory.all.takeRight(6)
     val builds = history.map(_.buildNumber)
@@ -40,7 +23,16 @@ object Application extends Controller {
       val failed = TestCase.findByBuildAndStatus(build.toInt, "Failed").toList
       val passedCount = TestCase.findByBuildAndStatus(build.toInt, "Passed").size
       val grouped = failed.groupBy(_.testName).toList.sortBy { x => x._2.size }.reverse
-      Ok(views.html.index(passedCount, build.toInt, grouped, builds, passedTests))
+      val scores = TestCaseScore.all
+      val groupedWithScores = grouped.map(entry => {
+        val score = scores.find(s => {
+          val tc = entry._2.head
+          s.id == TestCaseKey(tc.suiteName, tc.className, tc.testName)
+        })
+        (entry._1, (entry._2, score.map(_.value).getOrElse(10)))
+      })
+
+      Ok(views.html.index(passedCount, build.toInt, groupedWithScores, builds, passedTests))
     }
     result.getOrElse(BadRequest("unable to access jenkins"))
 

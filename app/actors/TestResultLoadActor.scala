@@ -7,6 +7,7 @@ import models._
 import play.api._
 
 case class LoadResult()
+case class UpdateScores()
 
 class TestResultLoadActor extends Actor {
 
@@ -33,6 +34,11 @@ class TestResultLoadActor extends Actor {
           }
         }
       }
+    }
+    
+    case UpdateScores => {
+      Logger.info("updating scores")
+      TestCaseHistory.calculateScore
     }
   }
 }

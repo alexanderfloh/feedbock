@@ -53,7 +53,7 @@ object TestCaseHistory extends ModelCompanion[TestCaseHistory, ObjectId] {
       map = calculateHistoryScore.map,
       reduce = calculateHistoryScore.reduce,
       finalizeFunction = Some(calculateHistoryScore.finalizeFunction),
-      output = MapReduceInlineOutput)
+      output = MapReduceStandardOutput("testCaseScores"))
     collection.mapReduce(mrc).toList
   }
 }
