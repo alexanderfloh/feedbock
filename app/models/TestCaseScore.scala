@@ -12,8 +12,6 @@ import se.radley.plugin.salat.Binders._
 import mongoContext._
 import com.mongodb.casbah.commons.MongoDBObject
 
-case class TestCaseKey(suiteName: String, className: String, testName: String)
-
 case class TestCaseScore(
   @Key("_id") id: TestCaseKey,
   value: Int)

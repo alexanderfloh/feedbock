@@ -22,7 +22,7 @@ object Application extends Controller {
     } yield {
       val failed = TestCase.findByBuildAndStatus(build.toInt, "Failed").toList
       val passedCount = TestCase.findByBuildAndStatus(build.toInt, "Passed").size
-      val grouped = failed.groupBy(_.testName).toList.sortBy { x => x._2.size }.reverse
+      val grouped = failed.groupBy(_.testCaseKey).toList.sortBy { x => x._2.size }.reverse
       val scores = TestCaseScore.all
       val groupedWithScores = grouped.map(entry => {
         val score = scores.find(s => {

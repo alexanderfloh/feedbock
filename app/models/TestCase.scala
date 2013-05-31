@@ -21,7 +21,10 @@ case class TestCase(
   className: String,
   suiteName: String,
   configurationName: String,
-  status: TestStatus)
+  status: TestStatus) {
+  
+  def testCaseKey = TestCaseKey(suiteName, className, testName)
+}
 
 object TestCase extends TestCaseDAO with TestCaseJson
 
