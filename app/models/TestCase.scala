@@ -22,8 +22,8 @@ case class TestCase(
   suiteName: String,
   configurationName: String,
   status: TestStatus) {
-  
-  def testCaseKey = TestCaseKey(suiteName, className, testName)
+
+  val testCaseKey = TestCaseKey(suiteName, className, testName)
 }
 
 object TestCase extends TestCaseDAO with TestCaseJson
@@ -42,18 +42,22 @@ trait TestCaseDAO extends ModelCompanion[TestCase, ObjectId] {
   def findByBuildAndStatus(build: Int, status: String) = dao.find(MongoDBObject("buildNumber" -> build, "status.name" -> status))
   def getById(id: String) = dao.findOneById(new ObjectId(id))
 
-  def findBySuiteClassAndTest(suite: String, clazz: String, test: String): List[TestCase] = {
+  def findByKey(key: TestCaseKey): List[TestCase] = {
     // find highest build number
     val cursor = dao.find(MongoDBObject(
-      "suiteName" -> suite,
-      "className" -> clazz,
-      "testName" -> test))
+      "suiteName" -> key.suiteName,
+      "className" -> key.className,
+      "testName" -> key.testName))
       .sort(orderBy = MongoDBObject("buildNumber" -> -1));
     if (!cursor.hasNext) {
       throw new RuntimeException("no data");
     }
     val testCase = cursor.next();
-    dao.find(MongoDBObject("suiteName" -> suite, "className" -> clazz, "testName" -> test, "buildNumber" -> testCase.buildNumber)).toList
+    dao.find(MongoDBObject(
+      "suiteName" -> key.suiteName,
+      "className" -> key.className,
+      "testName" -> key.testName,
+      "buildNumber" -> testCase.buildNumber)).toList
   }
 
   def countByStatus() = {

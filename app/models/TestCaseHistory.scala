@@ -37,11 +37,11 @@ object TestCaseHistory extends ModelCompanion[TestCaseHistory, ObjectId] {
   def collection = mongoCollection("testCaseHistory")
   val dao = new SalatDAO[TestCaseHistory, ObjectId](collection) {}
 
-  def getHistoryByTestCase(testCase: TestCase): List[TestCaseHistory] = {
+  def getHistoryByTestCase(testCaseKey: TestCaseKey): List[TestCaseHistory] = {
     dao.find(MongoDBObject(
-      "testName" -> testCase.testName,
-      "className" -> testCase.className,
-      "suiteName" -> testCase.suiteName))
+      "testName" -> testCaseKey.testName,
+      "className" -> testCaseKey.className,
+      "suiteName" -> testCaseKey.suiteName))
       .sort(orderBy = MongoDBObject("timestamp" -> -1)).toList
   }
 

@@ -20,31 +20,30 @@ object Application extends Controller {
     val result = for {
       build <- mostRecentBuild
     } yield {
-      val failed = TestCase.findByBuildAndStatus(build.toInt, "Failed").toList
       val passedCount = TestCase.findByBuildAndStatus(build.toInt, "Passed").size
-      val grouped = failed.groupBy(_.testCaseKey).toList.sortBy { x => x._2.size }.reverse
+      val failed = TestCase.findByBuildAndStatus(build.toInt, "Failed").toList
       val scores = TestCaseScore.all
-      val groupedWithScores = grouped.map(entry => {
-        val score = scores.find(s => {
-          val tc = entry._2.head
-          s.id == TestCaseKey(tc.suiteName, tc.className, tc.testName)
-        })
-        (entry._1, (entry._2, score.map(_.value).getOrElse(10)))
-      })
+      val grouped = failed.groupBy(_.testCaseKey).toList
+      val groupedWithScores = grouped.map {
+        case (key, testcases) => {
+          val score = scores.find(_.id == key)
+          (key, (testcases, score.map(_.value).getOrElse(10)))
+        }
+      }.sortBy { case (_, (_, score)) => score }.reverse
 
       Ok(views.html.index(passedCount, build.toInt, groupedWithScores, builds, passedTests))
     }
-    result.getOrElse(BadRequest("unable to access jenkins"))
+    result.getOrElse(BadRequest("unable to find most recent build number"))
 
   }
 
   def viewDetails(suite: String, clazz: String, test: String) = Action {
-    val results = TestCase.findBySuiteClassAndTest(suite, clazz, test)
+    val results = TestCase.findByKey(TestCaseKey(suite, clazz, test))
 
     val firstResult = results.head
 
     val configurationNames = results.map(entry => (entry.configurationName, entry.status))
-    val history = TestCaseHistory.getHistoryByTestCase(firstResult)
+    val history = TestCaseHistory.getHistoryByTestCase(firstResult.testCaseKey)
 
     Ok(views.html.testCaseDetails(firstResult, history, feedbackForm, configurationNames))
   }
@@ -60,13 +59,16 @@ object Application extends Controller {
   def submitFeedback(suite: String, className: String, test: String) = Action { implicit request =>
     val (defect, codeChange, timing, comment) = feedbackForm.bindFromRequest.get
 
-    val results = TestCase.findBySuiteClassAndTest(suite, className, test)
+    val results = TestCase.findByKey(TestCaseKey(suite, className, test))
     val firstResult = results.head
 
     val configurationNames = results.map(entry => (entry.configurationName, entry.status))
 
     val mostRecentBuild = MetaInformation.findByKey("mostRecentBuildNumber").map(_.toInt).getOrElse(0)
-    val additionalData = Map("defect" -> defect, "codeChange" -> codeChange, "timing" -> timing).map { case (key, value) => (key, value.toString) }
+    val additionalData = Map(
+      "defect" -> defect,
+      "codeChange" -> codeChange,
+      "timing" -> timing).map { case (key, value) => (key, value.toString) }
     val history = TestCaseHistory(mostRecentBuild, className, suite, test, comment, DateTime.now, additionalData)
     TestCaseHistory.insert(history)
     Redirect(routes.Application.viewDetails(suite, className, test))
