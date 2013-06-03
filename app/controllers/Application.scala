@@ -41,6 +41,10 @@ object Application extends Controller {
     result.getOrElse(BadRequest("unable to find most recent build number"))
 
   }
+  
+  def reactiveMongo = Action {
+    
+  }
 
   def viewDetails(suite: String, clazz: String, test: String) = Action {
     val action = for {

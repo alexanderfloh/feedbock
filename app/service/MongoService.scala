@@ -6,32 +6,34 @@ import reactivemongo.bson._
 import scala.concurrent.ExecutionContext.Implicits.global
 
 object MongoService {
-  private def connect() {
+
+  private def connect() = {
     val driver = new MongoDriver
     val connection = driver.connection(List("localhost"))
     val db = connection("feedbock")
-    val collection = db("testCases")
+    val ret = db("testCases")
+    ret
   }
+  
+  val driverConnection = connect
 
-
-  def loadTestCase() {
-    val driver = new MongoDriver
-    val connection = driver.connection(List("localhost"))
-    val db = connection("feedbock")
-    val collection = db("testCases")
-
+  def loadTestCase() = {
+    val driverConn = connect()
     val query = BSONDocument("_id" -> BSONDocument(
       "suiteName" -> "suiteName",
       "className" -> "className",
       "testName" -> "testName"))
     println("try to load...")
-    val cursor = collection.find(query).cursor[BSONDocument]
+    val driver = new MongoDriver
+    val connection = driver.connection(List("localhost"))
+    val db = connection("feedbock")
+    val coll = db("testCases")
+    val cursor = driverConnection.find(query).cursor[BSONDocument]
     cursor.next
-    /*cursor.enumerate.apply(Iteratee.foreach { doc =>
-      println("found document: " + BSONDocument.pretty(doc))
-
-      })*/
   }
-
+  
+  def loadTestsCasesSortedByScore {
+    
+  }
     
 }

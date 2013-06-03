@@ -10,6 +10,8 @@ GET     /loadBuild/:buildNumber controllers.Application.loadBuild(buildNumber: I
 GET     /calc controllers.Application.calc
 GET		/calcScores controllers.Application.calcScores
 
+GET		/reactiveMongo	controllers.Application.reactiveMongo
+
 POST    /submitFeedback/:suite/:className/:test controllers.Application.submitFeedback(suite: String, className: String, test: String)
 
 # Map static resources from the /public folder to the /assets URL path
