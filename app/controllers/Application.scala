@@ -4,6 +4,7 @@ import play.api.data._
 import play.api.data.Forms._
 import play.api.mvc._
 import models._
+import service._
 import results.{ Results, Build }
 import org.joda.time.DateTime
 import play.api.Play
@@ -13,6 +14,10 @@ object Application extends Controller {
   val jobUrl = Play.current.configuration.getString("jenkins.jobUrl")
 
   def index = Action {
+    val testCase = MongoService.loadTestCase
+
+    println("testcase: " + testCase)
+
     val history = BuildHistory.all.takeRight(6)
     val builds = history.map(_.buildNumber)
     val passedTests = history.map(_.value("passedTests"))
