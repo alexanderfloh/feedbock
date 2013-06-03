@@ -1,19 +1,31 @@
 package controllers
 
+import models._
+import org.joda.time.DateTime
+import scala.concurrent.Future
+
+import play.api.Logger
+import play.api.Play
 import play.api.data._
 import play.api.data.Forms._
+import play.api.Play.current
 import play.api.mvc._
-import models._
-import service._
-import results.{ Results, Build }
-import org.joda.time.DateTime
-import play.api.Play
+import play.modules.reactivemongo.{ MongoController, ReactiveMongoPlugin }
 
-object Application extends Controller {
+import reactivemongo.api.gridfs.GridFS
+import reactivemongo.api.gridfs.Implicits.DefaultReadFileReader
+import reactivemongo.api.collections.default.BSONCollection
+import reactivemongo.bson._
+
+object Application  extends Controller with MongoController {
 
   val jobUrl = Play.current.configuration.getString("jenkins.jobUrl")
 
+  val collection = db[BSONCollection]("testCases")
+
   def index = Action {
+    BadRequest("Not implemented")
+    /*
     val testCase = MongoService.loadTestCase
 
     println("testcase: " + testCase)
@@ -39,14 +51,35 @@ object Application extends Controller {
       Ok(views.html.index(passedCount, build.toInt, groupedWithScores, builds, passedTests))
     }
     result.getOrElse(BadRequest("unable to find most recent build number"))
-
+*/
   }
   
-  def reactiveMongo = Action {
-    
+  def reactiveMongo = Action { implicit request =>
+    Async {
+      val query = BSONDocument(
+        "$query" -> BSONDocument("_id.suiteName" -> "suiteName"))
+      val found = collection.find(query).cursor[TestCase]
+      val now = new DateTime
+      val newTestCase = TestCase(
+        Option(TestCaseKey("suiteName", "className", "testName9")),
+        List[TestCaseConfiguration](
+          TestCaseConfiguration("name", List[Int](1, 2), List[Int](3, 4))),
+        List[TestCaseFeedback](TestCaseFeedback("peter", 3, Option[DateTime](now), true, true, true, "comment")),
+        10)
+      collection.insert[TestCase](newTestCase)
+      found.toList.map { testCases =>
+        Ok(views.html.reactiveMongo(testCases))
+      }.recover {
+        case e =>
+          e.printStackTrace()
+          BadRequest(e.getMessage())
+      }
+    }
   }
 
   def viewDetails(suite: String, clazz: String, test: String) = Action {
+    BadRequest("TODO")
+    /*
     val action = for {
       mostRecentBuild <- MetaInformation.findByKey("mostRecentBuildNumber")
       testcase <- TestCase.findOneById(TestCaseKey(suite, clazz, test))
@@ -56,17 +89,23 @@ object Application extends Controller {
       Ok(views.html.testCaseDetails(testcase.id, mostRecentBuild.toInt, history.toList, feedbackForm, failedConfigs.toList))
     }
     action.getOrElse(NotFound("testcase not found"))
+    */
   }
 
   def loadBuild(buildNumber: Int) = Action {
+    BadRequest("TODO")
+    /*
     val triggeringBuild = Results.findRootTriggerBuild(jobUrl.get + "/" + buildNumber.toString)
 
     val testcases = Results.loadResultsForBuild(Build(buildNumber, jobUrl.get + "/" + buildNumber.toString), triggeringBuild.number)
     testcases.foreach(TestCase.save _)
     Ok(testcases.toList.mkString("\n"))
+    */
   }
 
   def submitFeedback(suite: String, className: String, test: String) = Action { implicit request =>
+    BadRequest("TODO")
+    /*
     val (defect, codeChange, timing, comment) = feedbackForm.bindFromRequest.get
 
     val action = for {
@@ -83,10 +122,12 @@ object Application extends Controller {
 
     }
     action.getOrElse(NotFound("testcase not found"))
+    */
   }
 
   def calc = Action {
-    Ok(TestCase.countByStatus().mkString)
+    BadRequest("TODO")
+    //Ok(TestCase.countByStatus().mkString)
   }
 
   def calcScores = Action {

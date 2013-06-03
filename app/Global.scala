@@ -12,9 +12,9 @@ import org.joda.time.DateTime
 
 object Global extends GlobalSettings {
   override def onStart(app: Application) {
-    val actor = Akka.system.actorOf(Props[TestResultLoadActor], name = "testResultLoadActor")
-    Akka.system.scheduler.schedule(5.seconds, 5.minutes, actor, actors.LoadResult)
-    Akka.system.scheduler.schedule(0.seconds, 5.minutes, actor, actors.UpdateScores)
+    //val actor = Akka.system.actorOf(Props[TestResultLoadActor], name = "testResultLoadActor")
+    //Akka.system.scheduler.schedule(5.seconds, 5.minutes, actor, actors.LoadResult)
+    //Akka.system.scheduler.schedule(0.seconds, 5.minutes, actor, actors.UpdateScores)
 
     import com.mongodb.casbah.commons.conversions.scala._
     RegisterJodaTimeConversionHelpers()

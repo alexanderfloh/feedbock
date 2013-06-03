@@ -1,58 +1,81 @@
 package models
 
+import org.jboss.netty.buffer._
 import org.joda.time.DateTime
-import com.mongodb.casbah.Imports.MapReduceCommand
-import com.mongodb.casbah.commons.MongoDBObject
-import com.mongodb.casbah.map_reduce.MapReduceStandardOutput
-import com.novus.salat.dao.ModelCompanion
-import com.novus.salat.dao.SalatDAO
-import mongoContext.ctx
-import play.api.Play.current
-import play.api.libs.functional.syntax._
-import play.api.libs.json._
-import play.api.libs.json.JsValue
-import play.api.libs.json.Writes
-import se.radley.plugin.salat.mongoCollection
-import utils.MapReduceFunctionLoader
-import com.novus.salat.annotations._
+import play.api.data._
+import play.api.data.Forms._
+import play.api.data.format.Formats._
+import play.api.data.validation.Constraints._
+import reactivemongo.bson._
 
 case class TestCaseConfiguration(
-    @Key("name")
     name: String, 
     var passed: List[Int] = List(), 
     var failed: List[Int] = List())
     
     
 object TestCaseConfiguration {
-  implicit val testCaseConfigurationJsonWrite = new Writes[TestCaseConfiguration] {
-    def writes(a: TestCaseConfiguration): JsValue = {
-      Json.obj(
-        "name" -> a.name,
-        "passed" -> a.passed,
-        "failed" -> a.failed
+  implicit object TestCaseConfigurationBSONReader extends BSONDocumentReader[TestCaseConfiguration] {
+    def read(doc: BSONDocument): TestCaseConfiguration = {
+      TestCaseConfiguration(
+        doc.getAs[String]("name").get,
+        doc.getAs[List[Int]]("passed").get,
+        doc.getAs[List[Int]]("failed").get
+        )
+    }
+  }
+  implicit object TestCaseConfigurationBSONWriter extends BSONDocumentWriter[TestCaseConfiguration] {
+    def write(config:TestCaseConfiguration): BSONDocument = {
+      BSONDocument(
+        "name" -> config.name,
+        "passed" -> config.passed,
+        "failed" -> config.failed
       )
     }
   }
-
-  implicit val testCaseConfigurationJsonRead = (
-    (__ \ 'name).read[String] ~
-    (__ \ 'passed).read[List[Int]] ~
-    (__ \ 'failed).read[List[Int]]
-  )(TestCaseConfiguration.apply _)
 }
 
 case class TestCaseFeedback(
     user: String,
     build: Int,
-    timestamp: DateTime,
+    timestamp: Option[DateTime],
     defect: Boolean,
     codeChange: Boolean,
     timingIssue: Boolean,
     comment: String    
     )
 
+object TestCaseFeedback {
+  implicit object TestCaseFeedbackBSONReader extends BSONDocumentReader[TestCaseFeedback] {
+    def read(doc: BSONDocument): TestCaseFeedback = {
+      TestCaseFeedback(
+        doc.getAs[String]("user").get,
+        doc.getAs[Int]("build").get,
+        doc.getAs[BSONDateTime]("timestamp").map(date => new DateTime(date.value)),
+        doc.getAs[Boolean]("defect").get,
+        doc.getAs[Boolean]("codeChange").get,
+        doc.getAs[Boolean]("timingIssue").get,
+        doc.getAs[String]("comment").get
+        )
+    }
+  }
+  implicit object TestCaseConfigurationBSONWriter extends BSONDocumentWriter[TestCaseFeedback] {
+    def write(feedback:TestCaseFeedback): BSONDocument = {
+      BSONDocument(
+        "user" -> feedback.user,
+        "build" -> feedback.build,
+        "timestamp" -> feedback.timestamp.map(date => BSONDateTime(date.getMillis)),
+        "defect" -> feedback.defect,
+        "codeChange" -> feedback.codeChange,
+        "timingIssue" -> feedback.timingIssue,
+        "comment" -> feedback.comment
+      )
+    }
+  }
+}
+
 case class TestCase(
-  @Key("_id") id: TestCaseKey,
+  var id: Option[TestCaseKey],
   var configurations: List[TestCaseConfiguration] = List(),
   var feedback: List[TestCaseFeedback] = List(),
   score: Int = 10
@@ -60,8 +83,43 @@ case class TestCase(
 
 }
 
-object TestCase extends TestCaseDAO
+object TestCase {
+  implicit object TestCaseBSONReader extends BSONDocumentReader[TestCase] {
+    def read(doc: BSONDocument): TestCase = {
+      println("call read " + BSONDocument.pretty(doc))
+      TestCase(
+        doc.getAs[BSONDocument]("_id").map({
+          objId => 
+          TestCaseKey(
+            objId.getAs[String]("suiteName").get,
+            objId.getAs[String]("className").get,
+            objId.getAs[String]("testName").get
+            )
+          }),
+        doc.getAs[List[TestCaseConfiguration]]("configurations").toList.flatten,
+        doc.getAs[List[TestCaseFeedback]]("feedback").toList.flatten,
+        doc.getAs[Int]("score").get
+      )
+    }
+  }
+  implicit object TestCaseBSONWriter extends BSONDocumentWriter[TestCase] {
+    def write(testCase:TestCase): BSONDocument = {
+      println("call write " + testCase)
+      BSONDocument(
+      "_id" -> testCase.id.map(id => BSONDocument(
+        "suiteName" -> id.suiteName,
+        "className" -> id.className,
+        "testName" -> id.testName)
+        ),
+      "configurations" -> testCase.configurations,
+      "feedback" -> testCase.feedback,
+      "score" -> testCase.score
+      )
+    }
+  }
+}
 
+/*
 trait TestCaseDAO extends ModelCompanion[TestCase, TestCaseKey] {
   def collection = mongoCollection("testCases")
   val dao = new SalatDAO[TestCase, TestCaseKey](collection) {}
@@ -87,3 +145,4 @@ trait TestCaseDAO extends ModelCompanion[TestCase, TestCaseKey] {
     collection.mapReduce(mrc).toList
   }
 }
+*/

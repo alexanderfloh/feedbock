@@ -9,18 +9,21 @@ import play.api._
 case class LoadResult()
 case class UpdateScores()
 
-class TestResultLoadActor extends Actor {
+class TestResultLoadActor /*extends Actor*/ {
 
   val jobUrl = Play.current.configuration.getString("jenkins.jobUrl")
 
   private def isNewBuildAvailable = {
+    /*
     val optResult = for {
       localMostRecent <- MetaInformation.findByKey("mostRecentBuildNumber")
       remoteMostRecent <- results.Results.findMostRecentBuild(jobUrl.get)
     } yield localMostRecent.toInt < remoteMostRecent.number
     optResult.getOrElse(true)
+    */
+    false
   }
-
+/*
   def receive = {
     case LoadResult => {
       Logger.info("checking for new test results")
@@ -40,5 +43,5 @@ class TestResultLoadActor extends Actor {
       Logger.info("updating scores")
       TestCaseHistory.calculateScore
     }
-  }
+  }*/
 }

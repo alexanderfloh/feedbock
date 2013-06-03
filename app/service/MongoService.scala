@@ -24,10 +24,6 @@ object MongoService {
       "className" -> "className",
       "testName" -> "testName"))
     println("try to load...")
-    val driver = new MongoDriver
-    val connection = driver.connection(List("localhost"))
-    val db = connection("feedbock")
-    val coll = db("testCases")
     val cursor = driverConnection.find(query).cursor[BSONDocument]
     cursor.next
   }

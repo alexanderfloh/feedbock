@@ -10,7 +10,7 @@ import models.TestCaseConfiguration
 
 case class Build(number: Int, url: String)
 
-object Results {
+/*object Results {
   val hostName = Play.current.configuration.getString("jenkins.hostName").getOrElse("http://localhost")
   val xmlApiSuffix = Play.current.configuration.getString("jenkins.xmlApiSuffix").getOrElse("")
 
@@ -114,4 +114,4 @@ object Results {
     })
     builds
   }
-}
+}*/
