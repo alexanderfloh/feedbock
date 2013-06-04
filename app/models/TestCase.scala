@@ -8,6 +8,14 @@ import play.api.data.format.Formats._
 import play.api.data.validation.Constraints._
 import reactivemongo.bson._
 
+case class TestCaseKey(suiteName: String, className: String, testName: String) {
+  def toUrlPart = {
+    val urlParts = List(suiteName, className, testName)
+    def encode(str: String) = java.net.URLEncoder.encode(str, "UTF-8")
+    urlParts.map(encode).mkString("/")
+  }
+}
+
 case class TestCaseConfiguration(
     name: String, 
     var passed: List[Int] = List(), 
@@ -79,9 +87,7 @@ case class TestCase(
   var configurations: List[TestCaseConfiguration] = List(),
   var feedback: List[TestCaseFeedback] = List(),
   score: Int = 10
-  ) {
-
-}
+  )
 
 object TestCase {
   implicit object TestCaseBSONReader extends BSONDocumentReader[TestCase] {
