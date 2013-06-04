@@ -9,7 +9,7 @@ import play.api._
 case class LoadResult()
 case class UpdateScores()
 
-class TestResultLoadActor /*extends Actor*/ {
+class TestResultLoadActor extends Actor {
 
   val jobUrl = Play.current.configuration.getString("jenkins.jobUrl")
 
@@ -21,21 +21,20 @@ class TestResultLoadActor /*extends Actor*/ {
     } yield localMostRecent.toInt < remoteMostRecent.number
     optResult.getOrElse(true)
     */
+    //true
     false
   }
-/*
   def receive = {
     case LoadResult => {
       Logger.info("checking for new test results")
       if (isNewBuildAvailable) {
         Logger.info("loading new test results")
         val testcases = results.Results.loadMostRecentBuild(jobUrl.get)
-        testcases.map {
-          case (buildNumber, cases) => {
-            MetaInformation.insertOrUpdate("mostRecentBuildNumber", buildNumber.toString)
-            cases.foreach(TestCase.save _)
-          }
-        }
+//        testcases.map {
+//          case (buildNumber, cases) => {
+//            MetaInformation.insertOrUpdate("mostRecentBuildNumber", buildNumber.toString)
+//          }
+//        }
       }
     }
     
@@ -43,5 +42,5 @@ class TestResultLoadActor /*extends Actor*/ {
       Logger.info("updating scores")
       TestCaseHistory.calculateScore
     }
-  }*/
+  }
 }

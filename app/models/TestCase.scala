@@ -46,7 +46,7 @@ object TestCaseConfiguration {
 case class TestCaseFeedback(
     user: String,
     build: Int,
-    timestamp: Option[DateTime],
+    timestamp: DateTime,
     defect: Boolean,
     codeChange: Boolean,
     timingIssue: Boolean,
@@ -56,10 +56,11 @@ case class TestCaseFeedback(
 object TestCaseFeedback {
   implicit object TestCaseFeedbackBSONReader extends BSONDocumentReader[TestCaseFeedback] {
     def read(doc: BSONDocument): TestCaseFeedback = {
+      val timestamp = doc.getAs[BSONDateTime]("timestamp").get
       TestCaseFeedback(
         doc.getAs[String]("user").get,
         doc.getAs[Int]("build").get,
-        doc.getAs[BSONDateTime]("timestamp").map(date => new DateTime(date.value)),
+        new DateTime(timestamp.value),
         doc.getAs[Boolean]("defect").get,
         doc.getAs[Boolean]("codeChange").get,
         doc.getAs[Boolean]("timingIssue").get,
@@ -69,10 +70,11 @@ object TestCaseFeedback {
   }
   implicit object TestCaseConfigurationBSONWriter extends BSONDocumentWriter[TestCaseFeedback] {
     def write(feedback:TestCaseFeedback): BSONDocument = {
+      val timestamp = feedback.timestamp
       BSONDocument(
         "user" -> feedback.user,
         "build" -> feedback.build,
-        "timestamp" -> feedback.timestamp.map(date => BSONDateTime(date.getMillis)),
+        "timestamp" -> BSONDateTime(timestamp.getMillis),
         "defect" -> feedback.defect,
         "codeChange" -> feedback.codeChange,
         "timingIssue" -> feedback.timingIssue,
@@ -83,7 +85,7 @@ object TestCaseFeedback {
 }
 
 case class TestCase(
-  var id: Option[TestCaseKey],
+  var id: TestCaseKey,
   var configurations: List[TestCaseConfiguration] = List(),
   var feedback: List[TestCaseFeedback] = List(),
   score: Int = 10
@@ -93,15 +95,14 @@ object TestCase {
   implicit object TestCaseBSONReader extends BSONDocumentReader[TestCase] {
     def read(doc: BSONDocument): TestCase = {
       println("call read " + BSONDocument.pretty(doc))
+      val objId = doc.getAs[BSONDocument]("_id").get
       TestCase(
-        doc.getAs[BSONDocument]("_id").map({
-          objId => 
           TestCaseKey(
             objId.getAs[String]("suiteName").get,
             objId.getAs[String]("className").get,
             objId.getAs[String]("testName").get
-            )
-          }),
+            
+          ),
         doc.getAs[List[TestCaseConfiguration]]("configurations").toList.flatten,
         doc.getAs[List[TestCaseFeedback]]("feedback").toList.flatten,
         doc.getAs[Int]("score").get
@@ -112,10 +113,10 @@ object TestCase {
     def write(testCase:TestCase): BSONDocument = {
       println("call write " + testCase)
       BSONDocument(
-      "_id" -> testCase.id.map(id => BSONDocument(
-        "suiteName" -> id.suiteName,
-        "className" -> id.className,
-        "testName" -> id.testName)
+      "_id" -> BSONDocument(
+        "suiteName" -> testCase.id.suiteName,
+        "className" -> testCase.id.className,
+        "testName" -> testCase.id.testName
         ),
       "configurations" -> testCase.configurations,
       "feedback" -> testCase.feedback,

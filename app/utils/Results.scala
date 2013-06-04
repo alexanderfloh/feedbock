@@ -7,10 +7,13 @@ import java.net.URL
 import play.api._
 import models.TestCaseKey
 import models.TestCaseConfiguration
+import services._
+import scala.concurrent.duration.Duration
+import scala.concurrent.Await
 
 case class Build(number: Int, url: String)
 
-/*object Results {
+object Results {
   val hostName = Play.current.configuration.getString("jenkins.hostName").getOrElse("http://localhost")
   val xmlApiSuffix = Play.current.configuration.getString("jenkins.xmlApiSuffix").getOrElse("")
 
@@ -34,6 +37,7 @@ case class Build(number: Int, url: String)
   def loadResultsForBuild(build: Build, triggeringBuildNumber: Int) = {
     val xml = XML.load(fromUrl(build.url + "/testReport/api/xml"))
     println("parsing")
+    val db = MongoService.getDb
     val testcaseNodes = xml \\ "case"
     testcaseNodes.map(tc => {
       val testName = tc \ "name"
@@ -45,7 +49,10 @@ case class Build(number: Int, url: String)
       val status = tc \ "status"
 
       val key = TestCaseKey(suiteName, className, testName.text)
-      val testCase = TestCase.findOneById(key).getOrElse(TestCase(key))
+      
+      
+      
+      val testCase = Await.result(MongoService.loadTestCaseByKey(db("testCases"), key), Duration.Inf).getOrElse(TestCase(key))
 
       val config = testCase.configurations.find(_.name == configurationName).getOrElse{
         val newConfig = TestCaseConfiguration(configurationName)
@@ -59,7 +66,7 @@ case class Build(number: Int, url: String)
         case TestStatus("Regression") => config.failed = config.failed :+ triggeringBuildNumber
       }
       
-      TestCase.save(testCase)
+      MongoService.saveTestCase(db("testCases"), testCase)
       testCase
     })
   }
@@ -114,4 +121,4 @@ case class Build(number: Int, url: String)
     })
     builds
   }
-}*/
+}
