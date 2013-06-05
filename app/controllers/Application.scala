@@ -37,18 +37,18 @@ object Application extends Controller with MongoController {
       val passedTests = history.map(_.value("passedTests"))
 
       val passedCount = 10 // TestCase.findByBuildAndStatus(build.toInt, "Passed").size
-      val failed = testCases // TestCase.findByBuildAndStatus(build.toInt, "Failed").toList
+      val failed = Await.result(MongoService.loadFailedTestsCasesSortedDescByScore(mostRecentBuild.value.toInt).toList, Duration.Inf) // TestCase.findByBuildAndStatus(build.toInt, "Failed").toList
       val scores = List[TestCaseScore]() // TestCaseScore.all
-      val grouped = failed.map(l => l.groupBy(tc => tc.id).toList)
-      val groupedWithScores = grouped.map {
-        _.map {
-          case (key, testcases) => {
-            val score = scores.find(_.id == key)
-            (key, (testcases, score.map(_.value).getOrElse(10)))
-          }
-        }.sortBy { case (_, (_, score)) => score }.reverse
-      }
-      groupedWithScores.map(g => Ok(views.html.index(passedCount, mostRecentBuild.value.toInt, g, builds, passedTests)))
+      //val grouped = failed.map(l => l.groupBy(tc => tc.id).toList)
+//      val groupedWithScores = grouped.map {
+//        _.map {
+//          case (key, testcases) => {
+//            val score = scores.find(_.id == key)
+//            (key, (testcases, score.map(_.value).getOrElse(10)))
+//          }
+//        }.sortBy { case (_, (_, score)) => score }.reverse
+//      }
+      Future(Ok(views.html.index(passedCount, mostRecentBuild.value.toInt, failed, builds, passedTests)))
     }
   }
 

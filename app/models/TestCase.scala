@@ -82,7 +82,17 @@ case class TestCase(
   var id: TestCaseKey,
   var configurations: List[TestCaseConfiguration] = List(),
   var feedback: List[TestCaseFeedback] = List(),
-  score: Int = 10)
+  score: Int = 10) {
+  def failedConfigsForBuild(buildNumber: Int) = {
+    var failedConfigs = List[TestCaseConfiguration]()
+    this.configurations.foreach({
+      config =>
+        failedConfigs = failedConfigs ++ List(config)
+        })
+    failedConfigs
+  }
+
+}
 
 object TestCase {
   implicit object TestCaseBSONReader extends BSONDocumentReader[TestCase] {

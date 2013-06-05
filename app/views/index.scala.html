@@ -1,6 +1,6 @@
 @(passedCount: Int, 
   currentBuild: Int, 
-  testCases: List[(TestCaseKey, (Seq[TestCase], Int))], 
+  testCases: List[TestCase], 
   builds: List[Int], 
   passedTests: List[Int])
   
@@ -72,18 +72,18 @@
 	      
 	      <div class="span8">
 	      <h1>To improve on that result, consider investigating one of those:</h1>
-		      @testCases.map { case (tcKey, (testCases, score)) => 
+		      @testCases.map { testCase => 
 		      <article>
-		      	<h2><a href="/details/@tcKey.toUrlPart">@tcKey.testName</a></h2>
+		      	<h2><a href="/details/@testCase.id.toUrlPart">@testCase.id.testName</a></h2>
 		      	<section>
-		      	Full name: <b>@tcKey.suiteName</b>/@Html("<wbr>")
-		      	<b>@tcKey.className</b>/@Html("<wbr>")
-		      	<b>@tcKey.testName</b>
+		      	Full name: <b>@testCase.id.suiteName</b>/@Html("<wbr>")
+		      	<b>@testCase.id.className</b>/@Html("<wbr>")
+		      	<b>@testCase.id.testName</b>
 		      	</br>
-		      	<span class="scorebox pull-right">@score<p>Score</p></span>
+		      	<span class="scorebox pull-right">@testCase.score<p>Score</p></span>
 		      	Test failed on 
 		      	<div>
-		      	@testCases.map{ tc =>  <span class="label label-info">TODO: tc.configurationName</span> }
+		      	@testCase.failedConfigsForBuild(currentBuild).map{ tc =>  <span class="label label-info">@tc.name</span> }
 		      	</div>
 		      	</section>
 		      </article>
