@@ -4,7 +4,6 @@ import models._
 import services._
 import org.joda.time.DateTime
 import scala.concurrent.Future
-
 import play.api.Logger
 import play.api.Play
 import play.api.data._
@@ -12,11 +11,13 @@ import play.api.data.Forms._
 import play.api.Play.current
 import play.api.mvc._
 import play.modules.reactivemongo.{ MongoController, ReactiveMongoPlugin }
-
 import reactivemongo.api.gridfs.GridFS
 import reactivemongo.api.gridfs.Implicits.DefaultReadFileReader
 import reactivemongo.api.collections.default.BSONCollection
 import reactivemongo.bson._
+import scala.concurrent.duration.Duration
+import scala.concurrent.Await
+
 
 object Application extends Controller with MongoController {
 
@@ -25,40 +26,35 @@ object Application extends Controller with MongoController {
   val collection = db[BSONCollection]("testCases")
 
   def index = Action {
+    val mostRecentBuild = Await.result(MongoService.loadMetaInformation("mostRecentBuildNumber"), Duration.Inf).getOrElse(MetaInformation("mostRecentBuildNumber", "0"))
     Async {
-      val testCases = MongoService.loadFailedTestsCasesSortedDescByScore(collection, 6600).toList
+      val testCases = MongoService.loadFailedTestsCasesSortedDescByScore(mostRecentBuild.value.toInt).toList
 
       val history = List[BuildHistory]()
-      
+
       //val history = BuildHistory.all.takeRight(6)
       val builds = history.map(_.buildNumber)
       val passedTests = history.map(_.value("passedTests"))
-      val mostRecentBuild = Some("6600") // MetaInformation.findByKey("mostRecentBuildNumber")
-      val result = for {
-        build <- mostRecentBuild
-      } yield {
-        val passedCount = 10 // TestCase.findByBuildAndStatus(build.toInt, "Passed").size
-        val failed = testCases // TestCase.findByBuildAndStatus(build.toInt, "Failed").toList
-        val scores = List[TestCaseScore]() // TestCaseScore.all
-        val grouped = failed.map(l => l.groupBy(tc => tc.id).toList)
-        val groupedWithScores = grouped.map { _.map {
+
+      val passedCount = 10 // TestCase.findByBuildAndStatus(build.toInt, "Passed").size
+      val failed = testCases // TestCase.findByBuildAndStatus(build.toInt, "Failed").toList
+      val scores = List[TestCaseScore]() // TestCaseScore.all
+      val grouped = failed.map(l => l.groupBy(tc => tc.id).toList)
+      val groupedWithScores = grouped.map {
+        _.map {
           case (key, testcases) => {
             val score = scores.find(_.id == key)
             (key, (testcases, score.map(_.value).getOrElse(10)))
           }
-        }.sortBy { case (_, (_, score)) => score }.reverse}
-
-        groupedWithScores.map(g => Ok(views.html.index(passedCount, build.toInt, g, builds, passedTests)))
-        
+        }.sortBy { case (_, (_, score)) => score }.reverse
       }
-      result.getOrElse(Future(BadRequest("unable to find most recent build number")))
-
+      groupedWithScores.map(g => Ok(views.html.index(passedCount, mostRecentBuild.value.toInt, g, builds, passedTests)))
     }
   }
 
   def reactiveMongo = Action { implicit request =>
     Async {
-      MongoService.loadFailedTestsCasesSortedDescByScore(collection, 3).toList.map { coll =>
+      MongoService.loadFailedTestsCasesSortedDescByScore(3).toList.map { coll =>
         println("coll: " + coll)
       }
 

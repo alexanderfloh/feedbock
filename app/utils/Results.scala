@@ -5,8 +5,7 @@ import se.radley.plugin.salat.Binders._
 import models.TestStatus
 import java.net.URL
 import play.api._
-import models.TestCaseKey
-import models.TestCaseConfiguration
+import models._
 import services._
 import scala.concurrent.duration.Duration
 import scala.concurrent.Await
@@ -31,13 +30,13 @@ object Results {
       val testcases = loadResultsForBuild(mostRecentBuild, triggeringBuild.number)
       Logger.info("collected results for build " + triggeringBuild.number + ", found " + testcases.size + " tests")
       (triggeringBuild.number, testcases)
+      MongoService.saveMetaInformation(MetaInformation("mostRecentBuildNumber", triggeringBuild.number.toString))
     }
   }
 
   def loadResultsForBuild(build: Build, triggeringBuildNumber: Int) = {
     val xml = XML.load(fromUrl(build.url + "/testReport/api/xml"))
     println("parsing")
-    val db = MongoService.getDb
     val testcaseNodes = xml \\ "case"
     testcaseNodes.map(tc => {
       val testName = tc \ "name"
@@ -52,7 +51,7 @@ object Results {
       
       
       
-      val testCase = Await.result(MongoService.loadTestCaseByKey(db("testCases"), key), Duration.Inf).getOrElse(TestCase(key))
+      val testCase = Await.result(MongoService.loadTestCaseByKey(key), Duration.Inf).getOrElse(TestCase(key))
 
       val config = testCase.configurations.find(_.name == configurationName).getOrElse{
         val newConfig = TestCaseConfiguration(configurationName)
@@ -66,7 +65,7 @@ object Results {
         case TestStatus("Regression") => config.failed = config.failed :+ triggeringBuildNumber
       }
       
-      MongoService.saveTestCase(db("testCases"), testCase)
+      MongoService.saveTestCase(testCase)
       testCase
     })
   }

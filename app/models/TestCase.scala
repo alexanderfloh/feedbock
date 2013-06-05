@@ -20,25 +20,22 @@ case class TestCaseConfiguration(
     name: String, 
     var passed: List[Int] = List(), 
     var failed: List[Int] = List())
-    
-    
+
 object TestCaseConfiguration {
   implicit object TestCaseConfigurationBSONReader extends BSONDocumentReader[TestCaseConfiguration] {
-    def read(doc: BSONDocument): TestCaseConfiguration = {
+    def read(config: BSONDocument): TestCaseConfiguration = {
       TestCaseConfiguration(
-        doc.getAs[String]("name").get,
-        doc.getAs[List[Int]]("passed").get,
-        doc.getAs[List[Int]]("failed").get
-        )
+        config.getAs[String]("name").get,
+        config.getAs[List[Int]]("passed").get,
+        config.getAs[List[Int]]("failed").get)
     }
   }
   implicit object TestCaseConfigurationBSONWriter extends BSONDocumentWriter[TestCaseConfiguration] {
-    def write(config:TestCaseConfiguration): BSONDocument = {
+    def write(config: TestCaseConfiguration): BSONDocument = {
       BSONDocument(
         "name" -> config.name,
         "passed" -> config.passed,
-        "failed" -> config.failed
-      )
+        "failed" -> config.failed)
     }
   }
 }
@@ -50,8 +47,7 @@ case class TestCaseFeedback(
     defect: Boolean,
     codeChange: Boolean,
     timingIssue: Boolean,
-    comment: String    
-    )
+    comment: String)
 
 object TestCaseFeedback {
   implicit object TestCaseFeedbackBSONReader extends BSONDocumentReader[TestCaseFeedback] {
@@ -64,8 +60,7 @@ object TestCaseFeedback {
         doc.getAs[Boolean]("defect").get,
         doc.getAs[Boolean]("codeChange").get,
         doc.getAs[Boolean]("timingIssue").get,
-        doc.getAs[String]("comment").get
-        )
+        doc.getAs[String]("comment").get)
     }
   }
   implicit object TestCaseConfigurationBSONWriter extends BSONDocumentWriter[TestCaseFeedback] {
@@ -78,8 +73,7 @@ object TestCaseFeedback {
         "defect" -> feedback.defect,
         "codeChange" -> feedback.codeChange,
         "timingIssue" -> feedback.timingIssue,
-        "comment" -> feedback.comment
-      )
+        "comment" -> feedback.comment)
     }
   }
 }
@@ -88,40 +82,32 @@ case class TestCase(
   var id: TestCaseKey,
   var configurations: List[TestCaseConfiguration] = List(),
   var feedback: List[TestCaseFeedback] = List(),
-  score: Int = 10
-  )
+  score: Int = 10)
 
 object TestCase {
   implicit object TestCaseBSONReader extends BSONDocumentReader[TestCase] {
     def read(doc: BSONDocument): TestCase = {
-      println("call read " + BSONDocument.pretty(doc))
       val objId = doc.getAs[BSONDocument]("_id").get
       TestCase(
-          TestCaseKey(
-            objId.getAs[String]("suiteName").get,
-            objId.getAs[String]("className").get,
-            objId.getAs[String]("testName").get
-            
-          ),
+        TestCaseKey(
+          objId.getAs[String]("suiteName").get,
+          objId.getAs[String]("className").get,
+          objId.getAs[String]("testName").get),
         doc.getAs[List[TestCaseConfiguration]]("configurations").toList.flatten,
         doc.getAs[List[TestCaseFeedback]]("feedback").toList.flatten,
-        doc.getAs[Int]("score").get
-      )
+        doc.getAs[Int]("score").get)
     }
   }
   implicit object TestCaseBSONWriter extends BSONDocumentWriter[TestCase] {
     def write(testCase:TestCase): BSONDocument = {
-      println("call write " + testCase)
       BSONDocument(
       "_id" -> BSONDocument(
         "suiteName" -> testCase.id.suiteName,
         "className" -> testCase.id.className,
-        "testName" -> testCase.id.testName
-        ),
+        "testName" -> testCase.id.testName),
       "configurations" -> testCase.configurations,
       "feedback" -> testCase.feedback,
-      "score" -> testCase.score
-      )
+      "score" -> testCase.score)
     }
   }
 }

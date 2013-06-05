@@ -9,32 +9,39 @@ import models._
 
 object MongoService {
   
-  def getDb = {
-    import reactivemongo.api._
-    import scala.concurrent.ExecutionContext.Implicits.global
-	val driver = new MongoDriver
-	val connection = driver.connection(List("localhost"))
-	connection("feedbock")
+  val db = {
+    val driver = new MongoDriver
+    val connection = driver.connection(List("localhost"))
+    connection("feedbock")
   }
 
-  def loadTestCaseByKey(coll: BSONCollection, key: TestCaseKey) = {
+  def loadTestCaseByKey(key: TestCaseKey) = {
     val query = BSONDocument("_id" -> BSONDocument(
       "suiteName" -> key.suiteName,
       "className" -> key.className,
       "testName" -> key.testName))
-    val foo = coll.find(query).cursor[TestCase]
-    foo.headOption
+    db("testCases").find(query).cursor[TestCase].headOption
   }
-  
-  def loadFailedTestsCasesSortedDescByScore(coll: BSONCollection, build: Int) = {
+
+  def loadFailedTestsCasesSortedDescByScore(build: Int) = {
     val query = BSONDocument(
-        "$orderby" -> BSONDocument("score" -> -1),
-        "$query" -> BSONDocument("configurations.failed" -> build))
-    coll.find(query).cursor[TestCase]
+      "$orderby" -> BSONDocument("score" -> -1),
+      "$query" -> BSONDocument("configurations.failed" -> build))
+    db("testCases").find(query).cursor[TestCase]
   }
-  
-  def saveTestCase(coll: BSONCollection, testCase: TestCase) = {
-    coll.save(testCase)
+
+  def saveTestCase(testCase: TestCase) = {
+    db("testCases").save(testCase)
   }
-    
+
+  def loadMetaInformation(key: String) = {
+    val query = BSONDocument(
+      "_id" -> key)
+    db("metaInformation").find(query).cursor[MetaInformation].headOption
+  }
+
+  def saveMetaInformation(doc: MetaInformation) = {
+    db("metaInformation").save(doc)
+  }
+
 }
