@@ -28,54 +28,13 @@ object Application extends Controller with MongoController {
   def index = Action {
     val mostRecentBuild = Await.result(MongoService.loadMetaInformation("mostRecentBuildNumber"), Duration.Inf).getOrElse(MetaInformation("mostRecentBuildNumber", "0"))
     Async {
-      val testCases = MongoService.loadFailedTestsCasesSortedDescByScore(mostRecentBuild.value.toInt).toList
-
       val history = List[BuildHistory]()
-
-      //val history = BuildHistory.all.takeRight(6)
       val builds = history.map(_.buildNumber)
       val passedTests = history.map(_.value("passedTests"))
-
       val passedCount = 10 // TestCase.findByBuildAndStatus(build.toInt, "Passed").size
-      val failed = Await.result(MongoService.loadFailedTestsCasesSortedDescByScore(mostRecentBuild.value.toInt).toList, Duration.Inf) // TestCase.findByBuildAndStatus(build.toInt, "Failed").toList
+      val failed = Await.result(MongoService.loadFailedTestsSortedByScoreDesc(mostRecentBuild.value.toInt).toList, Duration.Inf) // TestCase.findByBuildAndStatus(build.toInt, "Failed").toList
       val scores = List[TestCaseScore]() // TestCaseScore.all
-      //val grouped = failed.map(l => l.groupBy(tc => tc.id).toList)
-//      val groupedWithScores = grouped.map {
-//        _.map {
-//          case (key, testcases) => {
-//            val score = scores.find(_.id == key)
-//            (key, (testcases, score.map(_.value).getOrElse(10)))
-//          }
-//        }.sortBy { case (_, (_, score)) => score }.reverse
-//      }
       Future(Ok(views.html.index(passedCount, mostRecentBuild.value.toInt, failed, builds, passedTests)))
-    }
-  }
-
-  def reactiveMongo = Action { implicit request =>
-    Async {
-      MongoService.loadFailedTestsCasesSortedDescByScore(3).toList.map { coll =>
-        println("coll: " + coll)
-      }
-
-      val query = BSONDocument(
-        "$query" -> BSONDocument("_id.suiteName" -> "suiteName"))
-      val found = collection.find(query).cursor[TestCase]
-      val now = new DateTime
-      val newTestCase = TestCase(
-        TestCaseKey("suiteName", "className", "testName10"),
-        List[TestCaseConfiguration](
-          TestCaseConfiguration("name", List[Int](1, 2), List[Int](3, 4))),
-        List[TestCaseFeedback](TestCaseFeedback("peter", 3, now, true, true, true, "comment")),
-        10)
-      collection.insert[TestCase](newTestCase)
-      found.toList.map { testCases =>
-        Ok(views.html.reactiveMongo(testCases))
-      }.recover {
-        case e =>
-          e.printStackTrace()
-          BadRequest(e.getMessage())
-      }
     }
   }
 

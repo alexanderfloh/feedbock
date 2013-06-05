@@ -23,7 +23,7 @@ object MongoService {
     db("testCases").find(query).cursor[TestCase].headOption
   }
 
-  def loadFailedTestsCasesSortedDescByScore(build: Int) = {
+  def loadFailedTestsSortedByScoreDesc(build: Int) = {
     val query = BSONDocument(
       "$orderby" -> BSONDocument("score" -> -1),
       "$query" -> BSONDocument("configurations.failed" -> build))
