@@ -4,8 +4,7 @@ import models._
 import services._
 import org.joda.time.DateTime
 import scala.concurrent.Future
-import play.api.Logger
-import play.api.Play
+import play.api._
 import play.api.data._
 import play.api.data.Forms._
 import play.api.Play.current
@@ -17,7 +16,6 @@ import reactivemongo.api.collections.default.BSONCollection
 import reactivemongo.bson._
 import scala.concurrent.duration.Duration
 import scala.concurrent.Await
-
 
 object Application extends Controller with MongoController {
 
@@ -37,19 +35,17 @@ object Application extends Controller with MongoController {
     }
   }
 
+  def generateDetailsView(suiteName: String, className: String, testName: String) = {
+    val mostRecentBuild = Await.result(MongoService.loadMetaInformation("mostRecentBuildNumber"), Duration.Inf)
+      .getOrElse(MetaInformation("mostRecentBuildNumber", "0"))
+    val testCase = Await.result(MongoService.loadTestCaseByKey(TestCaseKey(suiteName, className, testName)), Duration.Inf)
+    testCase.map { tc =>
+      views.html.testCaseDetails(tc, mostRecentBuild.value.toInt, feedbackForm)
+    }.getOrElse(play.api.templates.Html.empty)
+  }
+
   def viewDetails(suite: String, clazz: String, test: String) = Action {
-    BadRequest("TODO")
-    /*
-    val action = for {
-      mostRecentBuild <- MetaInformation.findByKey("mostRecentBuildNumber")
-      testcase <- TestCase.findOneById(TestCaseKey(suite, clazz, test))
-    } yield {
-      val failedConfigs = testcase.configurations.filter(configuration => configuration.failed.contains(mostRecentBuild))
-      val history = testcase.feedback
-      Ok(views.html.testCaseDetails(testcase.id, mostRecentBuild.toInt, history.toList, feedbackForm, failedConfigs.toList))
-    }
-    action.getOrElse(NotFound("testcase not found"))
-    */
+    Ok(generateDetailsView(suite, clazz, test))
   }
 
   def loadBuild(buildNumber: Int) = Action {

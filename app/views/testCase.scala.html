@@ -1,0 +1,22 @@
+@(testCase: TestCase)
+<li>
+	<a href="/details/@testCase.id.toUrlPart"></a>
+	<h3>
+	@Html(testCase.id.testName.map(c => if(c.isUpper) "<wbr/>" + c else c).mkString)
+	</h3>
+	<p class="full-name">
+		@Html(testCase.id.suiteName.map(c => if(c == '_') "<wbr/>" + c else c).mkString)<br/>
+		@Html(testCase.id.className.map(c => if(c == '_') "<wbr/>" + c else c).mkString)<br/>
+		@Html(testCase.id.testName.map(c => if(c == '_') "<wbr/>" + c else c).mkString)
+	</p>
+	<p class="plattforms">
+		@Html(testCase.configurations.map(_.name).mkString(", <wbr/>")))
+	</p>
+	<div class="score">
+		@testCase.score
+		<span>score</span>
+	</div>
+
+	@controllers.Application.generateDetailsView(testCase.id.suiteName, testCase.id.className, testCase.id.testName)
+
+</li>

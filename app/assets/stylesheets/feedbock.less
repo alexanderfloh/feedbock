@@ -1,0 +1,463 @@
+
+/* Eric Meyer's Reset CSS v2.0 - http://cssreset.com */
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td,article,aside,canvas,details,embed,figure,figcaption,footer,header,hgroup,menu,nav,output,ruby,section,summary,time,mark,audio,video{border:0;font-size:100%;font:inherit;vertical-align:baseline;margin:0;padding:0}article,aside,details,figcaption,figure,footer,header,hgroup,menu,nav,section{display:block}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:none}table{border-collapse:collapse;border-spacing:0}
+
+@import url(http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,800italic,400,300,800);
+@import url(http://netdna.bootstrapcdn.com/font-awesome/3.1.1/css/font-awesome.css);
+
+.font {
+	font-family: 'Open Sans', sans-serif;
+	font-weight: 400;
+}
+.font-light {
+	font-family: 'Open Sans Light', sans-serif;
+	font-weight: 300;
+}
+.font-bold {
+	font-family: 'Open Sans Extrabold', sans-serif;
+	font-weight: 800;
+}
+
+@grey: hsl(214, 20%, 93%);
+@darkgrey: hsl(215, 16%, 15%);
+@green: hsl(172, 100%, 37%);
+@orange: hsl(22, 88%, 58%);
+
+.flex-container {
+	display: -webkit-box;      /* OLD - iOS 6-, Safari 3.1-6 */
+	display: -moz-box;         /* OLD - Firefox 19- (buggy but mostly works) */
+	display: -ms-flexbox;      /* TWEENER - IE 10 */
+	display: -webkit-flex;     /* NEW - Chrome */
+	display: flex;             /* NEW, Spec - Opera 12.1, Firefox 20+ */
+
+	// columns should not all be full height
+    -webkit-align-content: flex-start;
+    -ms-flex-line-pack: start;
+    align-content: flex-start;
+    -webkit-box-align: start;
+    -moz-box-align: start;
+    -webkit-align-items: flex-start;
+    -ms-flex-align: start;
+    align-items: flex-start;
+}
+.flex-element {
+	-webkit-box-flex: 1;      /* OLD - iOS 6-, Safari 3.1-6 */
+	-moz-box-flex: 1;         /* OLD - Firefox 19- */
+	width: 20%;               /* For old syntax, otherwise collapses. */
+	-webkit-flex: 1;          /* Chrome */
+	-ms-flex: 1;              /* IE 10 */
+	flex: 1;                  /* NEW, Spec - Opera 12.1, Firefox 20+ */
+}
+
+
+
+
+
+* {
+	-webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+	-moz-box-sizing: border-box;    /* Firefox, other Gecko */
+	box-sizing: border-box; 
+}
+
+body {
+	background: @grey;
+	.font;
+	color: @darkgrey;
+	padding: 100px 50px;
+}
+
+// when the details are open
+.details-open {
+	margin-left: -200px;
+	.status {
+		opacity: 0.4;
+	}
+	.tests {
+		background: rgba(255,255,255, 0.4);
+		li {
+			opacity: 0.4;
+			&.active, &:hover {
+				opacity: 1;
+			}
+		}
+	}
+}
+
+.content {
+	.flex-container;
+	.tests, #details {
+		.flex-element;
+	}
+}
+
+body > header {
+	background: @darkgrey;
+	text-align: center;
+	line-height: 50px;
+	font-size: 26px;
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	z-index: 100;
+
+	a {
+		text-decoration: none;
+	}
+
+	h1 {
+		.font-bold;
+		position: absolute;
+		left: 0; right: 0;
+		top: 3px;
+		bottom: 0;
+		color: white;
+		img {
+			height: 30px;
+		}
+		span {
+			position: relative;
+			top: -5px;
+		}
+	}
+
+	nav {
+		float: right;
+		.font-light;
+		font-size: 18px;
+		margin-right: 20px;
+		position: relative;
+		z-index: 5; // over the h1
+		color: rgba(255,255,255, 0.3);
+		a {
+			color: rgba(255,255,255, 0.3);
+			text-decoration: none;
+			&:hover {
+				text-decoration: underline;
+				color: rgba(255,255,255, 0.7);
+			}
+		}
+	}
+}
+
+
+.status {
+	width: 280px;
+	border-radius: 5px;
+	background: white;
+	margin-right: 30px;
+	padding: 20px;
+
+	header {
+		.font-bold;
+		margin: -20px -20px 20px;
+		line-height: 60px;
+		background-color: @green;
+		color: white;
+		text-align: center;
+		font-size: 22px;
+		border-radius: 5px 5px 0 0;
+	}
+
+	.build-info {
+		.flex-container;
+		background: @orange;
+		color: white;
+		padding: 10px 15px;
+		position: relative;
+ 		
+ 		div {
+ 			.flex-element;
+ 			&:first-child {
+ 				margin-right: 40px;
+ 			}
+ 			span {
+ 				opacity: 0.8;
+ 				font-size: 12px;
+ 			}
+ 			p {
+ 				margin-top: 5px;
+ 				font-size: 30px;
+ 			}
+ 		}
+
+ 		&:after {
+ 			content: '';
+			width: 0;
+			height: 0;
+			border-top: 20px solid @orange;
+			border-left: 20px solid transparent;
+			position: absolute;
+			right: 0;
+			bottom: -20px;
+ 		}
+	}
+
+	.graph {
+		.flex-container;
+		margin-top: 30px;
+		li {
+			.flex-element;
+			height: 75px;
+			width: 40px;
+			background: @grey;
+			margin-right: 20px;
+			position: relative;
+			border-radius: 3px;
+			&:last-child {
+				margin-right: 0;
+				> * {
+					background: @orange;
+				}
+			}
+
+			> * {
+				background: @green;
+				display: block;
+				position: absolute;
+				bottom: 0;
+				left: 0;
+				right: 0;
+				border-radius: 3px;
+			}
+		}
+	}
+}
+
+
+.tests {
+	background: white;
+
+	li {
+		position: relative;
+		min-height: 100px;
+		padding: 20px;
+		padding-right: 100px; // for the score
+		-webkit-transition: all 0.3s;
+		cursor: pointer;
+		&:before { // line between
+			content: '';
+			background: rgba(0,0,0, 0.07);
+			position: absolute;
+			left: 0;
+			right: 0;
+			top: 0;
+			height: 1px;
+		}
+		.details { display: none; }
+
+		&:first-child:before {
+			display: none;
+		}
+
+		h3 {
+			.font-bold;
+			font-size: 24px;
+		}
+		.full-name {
+			opacity: 0.3;
+			font-size: 12px;
+			margin: 10px 0;
+		}
+		.plattforms {
+			background: @orange;
+			color: white;
+			font-size: 12px;
+			padding: 5px 7px;
+			display: inline-block; // not full width
+		}
+
+		.score {
+			@size: 80px;
+			.font-bold;
+			width: @size;
+			height: @size;
+			border-radius: @size/2;
+			background: @green;
+			color: white;
+			text-align: center;
+			position: relative;
+			font-size: 40px;
+			padding-top: 13px;
+			position: absolute;
+			right: 10px;
+			top: 50%;
+			margin-top: -@size/2;
+			span {
+				.font-light;
+				margin-top: -5px;
+				font-size: 16px;
+				display: block;
+			}
+		}
+
+		&.active, &:hover {
+			background: @darkgrey;
+			color: white;
+		}
+	}
+}
+
+
+#details {
+	margin-left: 40px;
+	position: relative;
+	display: none; // shown in js
+
+	> * {
+		background: white;
+		margin-bottom: 20px;
+
+		header {
+			text-transform: uppercase;
+			background: @green;
+			color: white;
+			.font-bold;
+			font-size: 24px;
+			padding: 15px 20px;
+		}
+	}
+
+	&:before {
+		content: '';
+		width: 0;
+		height: 0;
+		border-top: 30px solid transparent;
+		border-right: 30px solid white;
+		border-bottom: 30px solid transparent;
+		position: absolute;
+		top: 40px;
+		left: -30px;
+	}
+
+	[data-action=close] {
+		position: absolute;
+		top: 0;
+		right: 0;
+		padding: 5px;
+		cursor: pointer;
+		opacity: 0.3;
+	}
+
+	.properties {
+		i {
+			@size: 42px;
+			width: @size;
+			height: @size;
+			border-radius: @size/2;
+			line-height: @size;
+			font-size: 30px;
+			color: white;
+			background: @orange;
+			display: inline-block;
+			text-align: center;
+			margin-left: 5px;
+		}
+	}
+
+
+	.description {
+		.properties {
+			position: absolute;
+			top: 20px;
+			right: 20px;
+		}
+		padding: 20px 30px;
+		span {
+			opacity: 0.6;
+			font-size: 14px;
+		}
+		p {
+			margin-bottom: 20px;
+			font-size: 26px;
+		}
+
+		.builds {
+			overflow: hidden;
+			li {
+				float: left;
+				width: 130px;
+				font-size: 12px;
+				background: @green;
+				color: white;
+				padding: 10px 15px;
+				margin: 1px;
+
+				&.failed {
+					background: @orange;
+				}
+
+				i {
+					margin-right: 7px;
+				}
+			}
+		}
+	}
+
+	.history {
+		padding-bottom: 5px;
+		min-height: 100px;
+		.properties i {
+			@size: 22px;
+			width: @size;
+			height: @size;
+			border-radius: @size/2;
+			line-height: @size;
+			font-size: 16px;
+			margin-left: 0;
+		}
+		.properties, h3, p {
+			display: inline-block;
+		}
+		.properties {
+			text-align: right;
+			width: 75px;
+		}
+		li {
+			margin: 15px 20px;
+			h3 {
+				.font-bold;
+				font-size: 22px;
+				margin: 0 10px;
+			}
+			p {
+				font-size: 14px;
+				opacity: 0.5;
+			}
+		}
+	}
+
+	.comments {
+		padding: 20px;
+		header {
+			margin: -20px -20px 20px;
+		}
+		p {
+			margin: 15px 0;
+		}
+		textarea {
+			background: @grey;
+			border: none;
+			padding: 20px;
+			.font-bold;
+			font-size: 18px;
+			width: 100%;
+			margin-top: 10px;
+			&:focus {
+				background: #ddd;
+			}
+		}
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
