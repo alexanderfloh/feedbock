@@ -1,16 +1,17 @@
-@(testCase: TestCase)
+@(testCase: TestCase,
+  currentBuild: Int)
 <li>
 	<a href="/details/@testCase.id.toUrlPart"></a>
 	<h3>
-	@Html(testCase.id.testName.map(c => if(c.isUpper) "<wbr/>" + c else c).mkString)
+	@Html(testCase.id.testNameWithBreakHints)
 	</h3>
 	<p class="full-name">
-		@Html(testCase.id.suiteName.map(c => if(c == '_') "<wbr/>" + c else c).mkString)<br/>
-		@Html(testCase.id.className.map(c => if(c == '_') "<wbr/>" + c else c).mkString)<br/>
-		@Html(testCase.id.testName.map(c => if(c == '_') "<wbr/>" + c else c).mkString)
+		@Html(testCase.id.suiteNameWithBreakHints)<br/>
+		@Html(testCase.id.classNameWithBreakHints)<br/>
+		@Html(testCase.id.testNameWithBreakHints)
 	</p>
 	<p class="plattforms">
-		@Html(testCase.configurations.map(_.name).mkString(", <wbr/>")))
+		@Html(testCase.failedConfigsForBuild(currentBuild).map(_.name).mkString(", <wbr/>")))
 	</p>
 	<div class="score">
 		@testCase.score

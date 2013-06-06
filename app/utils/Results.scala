@@ -48,14 +48,13 @@ object Results {
       val status = tc \ "status"
 
       val key = TestCaseKey(suiteName, className, testName.text)
-      
-      
-      
-      val testCase = Await.result(MongoService.loadTestCaseByKey(key), Duration.Inf).getOrElse(TestCase(key))
 
-      val config = testCase.configurations.find(_.name == configurationName).getOrElse{
+      var testCase = Await.result(MongoService.loadTestCaseByKey(key), Duration.Inf)
+        .getOrElse(TestCase(key))
+
+      var config = testCase.configurations.find(_.name == configurationName).getOrElse {
         val newConfig = TestCaseConfiguration(configurationName)
-        testCase.configurations = testCase.configurations :+ newConfig 
+        testCase = testCase.withConfiguration(newConfig)
         newConfig
       }
       TestStatus.fromStringCaseInsensitive(status.text) match {
@@ -64,7 +63,7 @@ object Results {
         case TestStatus("Failed") => config.failed = config.failed :+ triggeringBuildNumber
         case TestStatus("Regression") => config.failed = config.failed :+ triggeringBuildNumber
       }
-      
+
       MongoService.saveTestCase(testCase)
       testCase
     })
