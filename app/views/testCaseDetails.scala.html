@@ -1,144 +1,59 @@
-@(testCase: TestCaseKey, mostRecentBuild: Int, history: List[TestCaseFeedback], feedbackForm: Form[(Boolean, Boolean, Boolean, String)], configurations: List[TestCaseConfiguration])
+@(testCase: TestCase, 
+	mostRecentBuild: Int, 
+	feedbackForm: Form[(Boolean, Boolean, Boolean, String)])
 @import helper._
 
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>Feedbock</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="">
-    <meta name="author" content="">
+<div class="details">
+	<i class="icon-remove" data-action="close"></i>
+	<div class="description">
+		<span>Test</span>
+		<p>@testCase.id.testName</p>
+		<span>Class</span>
+		<p>@testCase.id.className</p>
+		<span>Suite</span>
+		<p>@testCase.id.suiteName</p>
 
-    <!-- Le styles -->
-    <link href="/assets/stylesheets/bootstrap.css" rel="stylesheet">
-    <style>
-      body {
-        padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
-      }
-    </style>
-    <link href="/assets/stylesheets/bootstrap-responsive.css" rel="stylesheet">
-
-    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
-    <!--[if lt IE 9]>
-      <script src="/assets/javascripts/html5shiv.js"></script>
-    <![endif]-->
-
-    <!-- Fav and touch icons -->
-    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/assets/ico/apple-touch-icon-144-precomposed.png">
-    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/assets/ico/apple-touch-icon-114-precomposed.png">
-    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/assets/ico/apple-touch-icon-72-precomposed.png">
-    <link rel="apple-touch-icon-precomposed" href="/assets/ico/apple-touch-icon-57-precomposed.png">
-    <link rel="shortcut icon" href="/assets/images/favicon.ico">
-  </head>
-  <body>
-    <div class="navbar navbar-inverse navbar-fixed-top">
-      <div class="navbar-inner">
-        <div class="container">
-          <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-          <a class="brand" href="/">Feedbock</a>
-          <div class="nav-collapse collapse">
-            <ul class="nav">
-              <li class="active"><a href="#">Home</a></li>
-              <li><a href="#about">About</a></li>
-              <li><a href="#contact">Contact</a></li>
-            </ul>
-          </div><!--/.nav-collapse -->
-        </div>
-      </div>
-    </div>
-    <div class="container">
-        @helper.form(action = routes.Application.submitFeedback(testCase.suiteName, testCase.className, testCase.testName), 'class -> "form-horizontal span6") {
-        	<ul>
-        		@configurations.map { entry =>
-        			<li>@entry.name, Failed</li>
-        		}
-        	</ul>
-			<fieldset>
-
-				<div class="control-group">
-					<label class="control-label">Build Number</label>
-					<div class="controls">
-						<input type="text" class="input-block-level" required readonly="readonly" value="@mostRecentBuild">
-					</div>
-				</div>
-				<div class="control-group">
-					<label class="control-label">Test</label>
-					<div class="controls">
-						<input type="text" class="input-block-level" required readonly="readonly" value="@testCase.testName">
-					</div>
-				</div>
-				<div class="control-group">
-					<label class="control-label">Class</label>
-					<div class="controls">
-						<input type="text" class="input-block-level" required readonly="readonly" value="@testCase.className">
-					</div>
-				</div>
-				<div class="control-group">
-					<label class="control-label">Suite</label>
-					<div class="controls">
-						<input type="text" class="input-block-level" required readonly="readonly" value="@testCase.suiteName">
-					</div>
-				</div>
-				<div class="control-group">
-					<label class="control-label">Defect</label>
-					<div class="controls">
-						<label class="checkbox">
-							<input type="checkbox" name="defect" value="true" />
-						</label>
-					</div>
-				</div>
-				<div class="control-group">
-					<label class="control-label">Code Change</label>
-					<div class="controls">
-						<label class="checkbox">
-							<input type="checkbox" name="codeChange" value="true" />
-						</label>
-					</div>
-				</div>
-				<div class="control-group">
-					<label class="control-label">Timing Issue</label>
-					<div class="controls">
-						<label class="checkbox">
-							<input type="checkbox" name="timing" value="true" />
-						</label>
-					</div>
-				</div>
-				<div class="control-group">
-					<label class="control-label">Comment</label>
-					<div class="controls">
-						<label class="textarea">
-							<textarea name="comment" rows="5" placeholder="enter a comment..."></textarea>
-						</label>
-					</div>
-				</div>
-				<div class="control-group">
-					<div class="controls">
-						<label class="submit">
-							<input type="submit" />
-						</label>
-					</div>
-				</div>
-				
-			</fieldset>
+		<ul class="builds">
+			@testCase.configurations.map { c =>
+			
+			@if(c.passed.contains(mostRecentBuild)) { 
+		    	<li><i class="icon-ok"> 
+		    } else { 
+				<li class="failed"><i class="icon-remove"> 
+		    }
+			</i>
+			@c.name
+			</li> 
 			}
-		<div class="row">
-			<h2 class="span5">History</h2>
-			@history.map { entry =>
-				<div class="span5">
-					<span class="badge">@mostRecentBuild</span>
-					@entry.comment
-					@if(entry.defect) { <span class="label label-info">Defect</span> }
-					@if(entry.codeChange) { <span class="label label-info">Code Change</span> }
-					@if(entry.timingIssue) { <span class="label label-info">Timing issue</span> }
-				</div>
-			}
-      	</div>
-    </div> <!-- /container -->
-    <script src="/assets/javascripts/require-jquery.js" data-main="/assets/javascripts/main"></script>
-  </body>
-</html>
+		</ul>
+	</div>
+
+	<ul class="history">
+		<header>history</header>
+		@*
+		@history.map { historyEntry => 
+		<li>
+			<div class="properties">
+				@if(historyEntry.isCodeChange) { <i class="icon-code" title="code change"></i> }
+				@if(historyEntry.isTiming) { <i class="icon-time" title="timing issue"></i> }
+				@if(historyEntry.isDefect) { <i class="icon-remove" title="defect"></i> }
+			</div>
+			<h3>@historyEntry.buildNumber</h3>
+			<p>@historyEntry.comment</p>
+		</li>
+		}
+		*@
+	</ul>
+
+	<div class="comments">
+		<header>feedback</header>
+		<div class="properties">
+			<i class="icon-code" title="code change"></i>
+			<i class="icon-time" title="timing issue"></i>
+			<i class="icon-remove" title="defect"></i>
+		</div>
+		<p>this is my comment. teh lols.</p>
+		<p>who am i? who are you?!?!</p>
+		<textarea placeholder="Be the first to comment..."></textarea>
+	</div>
+</div>
