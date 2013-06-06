@@ -13,7 +13,7 @@ case class User(
   alias: String,
   emailAdresses: List[UserEmail],
   passwordAuthentication: Option[UserPasswordAuthentication],
-  isAdmin: Bool,
+  isAdmin: Boolean,
   sessions: List[UserSession],
   createDate: DateTime)
 
