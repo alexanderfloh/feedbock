@@ -13,7 +13,11 @@ import org.joda.time.DateTime
 object Global extends GlobalSettings {
   override def onStart(app: Application) {
     val actor = Akka.system.actorOf(Props[TestResultLoadActor], name = "testResultLoadActor")
-    Akka.system.scheduler.schedule(5.seconds, 5.minutes, actor, actors.LoadResult)
+    if (Play.current.configuration.getString("autoload.results").map(_.toBoolean).getOrElse(true)) {
+      Akka.system.scheduler.schedule(5.seconds, 5.minutes, actor, actors.LoadResult)
+    } else {
+      Logger.info("result auto-loading disabled in config file")
+    }
     //Akka.system.scheduler.schedule(0.seconds, 5.minutes, actor, actors.UpdateScores)
 
     import com.mongodb.casbah.commons.conversions.scala._
