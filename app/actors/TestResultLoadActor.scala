@@ -18,9 +18,14 @@ class TestResultLoadActor extends Actor {
 
   private def isNewBuildAvailable = {
     val localMostRecent = Await.result(MongoService.loadMetaInformation("mostRecentBuildNumber"), Duration.Inf).getOrElse(MetaInformation("mostRecentBuildNumber", "0"))
+    Logger.info("local most recent build number: " + localMostRecent.value)
     val optResult = for {
       remoteMostRecent <- results.Results.findMostRecentBuild(jobUrl.get)
-    } yield localMostRecent.value.toInt < remoteMostRecent.number
+    } yield {
+      val triggeringBuild =  results.Results.findRootTriggerBuild(remoteMostRecent.url)
+      Logger.info("remote most recent build number: " + triggeringBuild.number)
+      localMostRecent.value.toInt < triggeringBuild.number
+    }
     optResult.getOrElse(true)
   }
   def receive = {

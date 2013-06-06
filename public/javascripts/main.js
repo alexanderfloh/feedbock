@@ -11,11 +11,23 @@ require(["jquery"], function($) {
         })
         return ret;
     };
+
+    var crateDomDump = function() {
+        return createElemFromSelector($("html"));
+    };
+
+    var interceptEvents = function() {
+        $("html").on("click", "body", function(e) {
+            console.log("click" + e);
+        });
+    };
+
+    interceptEvents();
+
+    //var webSocket = new WebSocket("ws://localhost:9000/instrumentation")
     
     $(function() {
-        console.log("do");
-        var dump = createElemFromSelector($("html"));
-        console.log(JSON.stringify(dump, null, "\t"));
+        console.log(JSON.stringify(crateDomDump(), null, "\t"));
     });
 
 });

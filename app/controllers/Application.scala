@@ -33,7 +33,6 @@ object Application extends Controller with MongoController {
       val passedTests = history.map(_.value("passedTests"))
       val passedCount = 10 // TestCase.findByBuildAndStatus(build.toInt, "Passed").size
       val failed = Await.result(MongoService.loadFailedTestsSortedByScoreDesc(mostRecentBuild.value.toInt).toList, Duration.Inf) // TestCase.findByBuildAndStatus(build.toInt, "Failed").toList
-      val scores = List[TestCaseScore]() // TestCaseScore.all
       Future(Ok(views.html.index(passedCount, mostRecentBuild.value.toInt, failed, builds, passedTests)))
     }
   }
