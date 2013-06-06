@@ -58,10 +58,8 @@ object Results {
         newConfig
       }
       TestStatus.fromStringCaseInsensitive(status.text) match {
-        case TestStatus("Passed") => config.passed = config.passed :+ triggeringBuildNumber
-        case TestStatus("Fixed") => config.passed = config.passed :+ triggeringBuildNumber
-        case TestStatus("Failed") => config.failed = config.failed :+ triggeringBuildNumber
-        case TestStatus("Regression") => config.failed = config.failed :+ triggeringBuildNumber
+        case Passed => config.passed = config.passed :+ triggeringBuildNumber
+        case Failed => config.failed = config.failed :+ triggeringBuildNumber
       }
 
       MongoService.saveTestCase(testCase)
