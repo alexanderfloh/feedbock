@@ -7,23 +7,22 @@
 	<i class="icon-remove" data-action="close"></i>
 	<div class="description">
 		<span>Test</span>
-		<p>@testCase.id.testName</p>
+		<p>@Html(testCase.id.testNameWithBreakHints)</p>
 		<span>Class</span>
-		<p>@testCase.id.className</p>
+		<p>@Html(testCase.id.classNameWithBreakHints)</p>
 		<span>Suite</span>
-		<p>@testCase.id.suiteName</p>
+		<p>@Html(testCase.id.suiteNameWithBreakHints)</p>
 
 		<ul class="builds">
 			@testCase.configurations.map { c =>
-			
-			@if(c.passed.contains(mostRecentBuild)) { 
-		    	<li><i class="icon-ok"> 
-		    } else { 
-				<li class="failed"><i class="icon-remove"> 
-		    }
-			</i>
-			@c.name
-			</li> 
+				@if(c.passed.contains(mostRecentBuild)) { 
+			    	<li><i class="icon-ok"> 
+			    } else { 
+					<li class="failed"><i class="icon-remove"> 
+			    }
+				</i>
+				@c.name
+				</li> 
 			}
 		</ul>
 	</div>

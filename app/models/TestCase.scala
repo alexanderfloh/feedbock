@@ -8,7 +8,20 @@ import play.api.data.format.Formats._
 import play.api.data.validation.Constraints._
 import reactivemongo.bson._
 
-case class TestCaseKey(suiteName: String, className: String, testName: String) {
+case class TestCaseKey(
+    suiteName: String, 
+    className: String, 
+    testName: String) {
+  
+  
+  val suiteNameWithBreakHints = addBreakHints(suiteName)
+  val classNameWithBreakHints = addBreakHints(className)
+  val testNameWithBreakHints = addBreakHints(testName)
+  
+  private def addBreakHints(str: String) = {
+    str.map(c => if(c.isUpper || c == '_') "<wbr/>" + c else c).mkString
+  }
+
   def toUrlPart = {
     val urlParts = List(suiteName, className, testName)
     def encode(str: String) = java.net.URLEncoder.encode(str, "UTF-8")
@@ -79,19 +92,18 @@ object TestCaseFeedback {
 }
 
 case class TestCase(
-  var id: TestCaseKey,
-  var configurations: List[TestCaseConfiguration] = List(),
-  var feedback: List[TestCaseFeedback] = List(),
+  id: TestCaseKey,
+  configurations: List[TestCaseConfiguration] = List(),
+  feedback: List[TestCaseFeedback] = List(),
   score: Int = 10) {
+  
   def failedConfigsForBuild(buildNumber: Int) = {
-    var failedConfigs = List[TestCaseConfiguration]()
-    this.configurations.foreach({
-      config =>
-        failedConfigs = failedConfigs ++ List(config)
-        })
-    failedConfigs
+    configurations.filter(_.failed.contains(buildNumber))
   }
-
+  
+  def withConfiguration(configuration: TestCaseConfiguration) = 
+    TestCase(id, configuration :: configurations, feedback, score)
+    
 }
 
 object TestCase {
