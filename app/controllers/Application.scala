@@ -30,22 +30,23 @@ object Application extends Controller with MongoController {
       val builds = history.map(_.buildNumber)
       val passedTests = history.map(_.value("passedTests"))
       val passedCount = 10 // TestCase.findByBuildAndStatus(build.toInt, "Passed").size
-      val failed = Await.result(MongoService.loadFailedTestsSortedByScoreDesc(mostRecentBuild.value.toInt).toList, Duration.Inf) // TestCase.findByBuildAndStatus(build.toInt, "Failed").toList
-      Future(Ok(views.html.index(passedCount, mostRecentBuild.value.toInt, failed, builds, passedTests)))
+      val failed = Await.result(MongoService.loadFailedTestsSortedByScoreDesc(mostRecentBuild.value.toInt).toList, Duration.Inf)
+      val failedWithDetails = failed.map(tc => (tc, generateDetailsView(tc.id)))
+      Future(Ok(views.html.index(passedCount, mostRecentBuild.value.toInt, failedWithDetails, builds, passedTests)))
     }
   }
 
-  def generateDetailsView(suiteName: String, className: String, testName: String) = {
+  def generateDetailsView(id: TestCaseKey) = {
     val mostRecentBuild = Await.result(MongoService.loadMetaInformation("mostRecentBuildNumber"), Duration.Inf)
       .getOrElse(MetaInformation("mostRecentBuildNumber", "0"))
-    val testCase = Await.result(MongoService.loadTestCaseByKey(TestCaseKey(suiteName, className, testName)), Duration.Inf)
+    val testCase = Await.result(MongoService.loadTestCaseByKey(id), Duration.Inf)
     testCase.map { tc =>
       views.html.testCaseDetails(tc, mostRecentBuild.value.toInt, feedbackForm)
     }.getOrElse(play.api.templates.Html.empty)
   }
 
   def viewDetails(suite: String, clazz: String, test: String) = Action {
-    Ok(generateDetailsView(suite, clazz, test))
+    Ok(generateDetailsView(TestCaseKey(suite, clazz, test)))
   }
 
   def loadBuild(buildNumber: Int) = Action {

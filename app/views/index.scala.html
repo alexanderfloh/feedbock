@@ -1,6 +1,6 @@
 @(passedCount: Int, 
   currentBuild: Int, 
-  testCases: List[TestCase], 
+  testCases: List[(TestCase, Html)], 
   builds: List[Int], 
   passedTests: List[Int])
   
@@ -49,14 +49,13 @@
 				<li><span style="height: 20%"></span></li>
 				<li><span style="height: 60%"></span></li>
 				<li><span style="height: 85%"></span></li>
-				<li><span style="height: 70%"></span></li>
 			</ul>
 		</section>
 
 
 		<ul class="tests">
-		    @testCases.map{ tc =>
-		      @views.html.testCase(tc, currentBuild)
+		    @testCases.map{ case (tc, details) =>
+		      @views.html.testCase(tc, details, currentBuild)
 		    }
 		</ul>
 
