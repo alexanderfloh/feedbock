@@ -150,31 +150,3 @@ object TestCase {
     }
   }
 }
-
-/*
-trait TestCaseDAO extends ModelCompanion[TestCase, TestCaseKey] {
-  def collection = mongoCollection("testCases")
-  val dao = new SalatDAO[TestCase, TestCaseKey](collection) {}
-
-  // Indexes
-  //collection.ensureIndex(DBObject("username" -> 1), "user_email", unique = true)
-
-  // Queries
-  def all(): List[TestCase] = dao.find(MongoDBObject.empty).toList
-  def findByBuildNumber(buildNumber: Long): List[TestCase] = dao.find(MongoDBObject("buildNumber" -> buildNumber)).toList
-  def findByStatus(status: String) = dao.find(MongoDBObject("status.name" -> status)).toList
-  def findByBuildAndStatus(build: Int, status: String) = dao.find(MongoDBObject("buildNumber" -> build, "status.name" -> status))
-
-  def countByStatus() = {
-    val countByStatusFunctions = MapReduceFunctionLoader("feedbockJS", "countByStatus")
-    val mrc = MapReduceCommand(
-      input = "testCases",
-      map = countByStatusFunctions.map,
-      reduce = countByStatusFunctions.reduce,
-      finalizeFunction = None,
-      verbose = true,
-      output = MapReduceStandardOutput("buildHistory"))
-    collection.mapReduce(mrc).toList
-  }
-}
-*/

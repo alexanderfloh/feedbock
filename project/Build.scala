@@ -11,15 +11,12 @@ object ApplicationBuild extends Build {
     // Add your project dependencies here,
     //jdbc,
     //anorm,
-    "se.radley" %% "play-plugins-salat" % "1.2",
     //"org.reactivemongo" %% "reactivemongo" % "0.9",
     "org.reactivemongo" %% "play2-reactivemongo" % "0.9"
   )
 
   val main = play.Project(appName, appVersion, appDependencies).settings(
     // Add your own project settings here     
-    routesImport += "se.radley.plugin.salat.Binders._",
-    templatesImport += "org.bson.types.ObjectId",
     resolvers += Resolver.sonatypeRepo("snapshots")
   )
 

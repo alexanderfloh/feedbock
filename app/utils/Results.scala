@@ -1,7 +1,6 @@
 package results
 import scala.xml.XML
 import models.TestCase
-import se.radley.plugin.salat.Binders._
 import models.TestStatus
 import java.net.URL
 import play.api._

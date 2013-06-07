@@ -10,7 +10,6 @@ import scala.concurrent.duration.Duration
 import scala.concurrent.Await
 
 case class LoadResult()
-case class UpdateScores()
 
 class TestResultLoadActor extends Actor {
 
@@ -40,11 +39,6 @@ class TestResultLoadActor extends Actor {
 //          }
 //        }
       }
-    }
-    
-    case UpdateScores => {
-      Logger.info("updating scores")
-      TestCaseHistory.calculateScore
     }
   }
 }

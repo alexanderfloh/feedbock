@@ -9,7 +9,6 @@ import org.joda.time.DateTime
 
 import models.MetaInformation
 import models.TestCaseFeedback
-import models.TestCaseHistory
 import models.TestCaseKey
 import play.api.Play
 import play.api.data.Form
@@ -95,15 +94,6 @@ object Application extends Controller {
         actionOpt.getOrElse(NotFound("invalid test case id"))
       }
     }
-  }
-
-  def calc = Action {
-    BadRequest("TODO")
-    //Ok(TestCase.countByStatus().mkString)
-  }
-
-  def calcScores = Action {
-    Ok(TestCaseHistory.calculateScore.mkString)
   }
 
   val feedbackForm = Form(

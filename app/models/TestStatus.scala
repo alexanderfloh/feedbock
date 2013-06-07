@@ -1,7 +1,4 @@
 package models
-import com.mongodb.casbah.Imports._
-import play.api.libs.json._
-import play.api.libs.functional.syntax._
 
 class TestStatus(name: String) 
 case object Passed extends TestStatus("Passed")
