@@ -9,17 +9,16 @@ import play.api.data.validation.Constraints._
 import reactivemongo.bson._
 
 case class TestCaseKey(
-    suiteName: String, 
-    className: String, 
-    testName: String) {
-  
-  
+  suiteName: String,
+  className: String,
+  testName: String) {
+
   val suiteNameWithBreakHints = addBreakHints(suiteName)
   val classNameWithBreakHints = addBreakHints(className)
   val testNameWithBreakHints = addBreakHints(testName)
-  
+
   private def addBreakHints(str: String) = {
-    str.map(c => if(c.isUpper || c == '_') "<wbr/>" + c else c).mkString
+    str.map(c => if (c.isUpper || c == '_') "<wbr/>" + c else c).mkString
   }
 
   def toUrlPart = {
@@ -30,9 +29,9 @@ case class TestCaseKey(
 }
 
 case class TestCaseConfiguration(
-    name: String, 
-    var passed: List[Int] = List(), 
-    var failed: List[Int] = List())
+  name: String,
+  var passed: List[Int] = List(),
+  var failed: List[Int] = List())
 
 object TestCaseConfiguration {
   implicit object TestCaseConfigurationBSONReader extends BSONDocumentReader[TestCaseConfiguration] {
@@ -54,13 +53,22 @@ object TestCaseConfiguration {
 }
 
 case class TestCaseFeedback(
-    user: String,
-    build: Int,
-    timestamp: DateTime,
-    defect: Boolean,
-    codeChange: Boolean,
-    timingIssue: Boolean,
-    comment: String)
+  user: String,
+  build: Int,
+  timestamp: DateTime,
+  defect: Boolean,
+  codeChange: Boolean,
+  timingIssue: Boolean,
+  comment: String) {
+
+  def scoreDelta = {
+    var delta = 0
+    if (defect) delta += 10
+    if (codeChange) delta += 5
+    if (timingIssue) delta -= 2
+    delta
+  }
+}
 
 object TestCaseFeedback {
   implicit object TestCaseFeedbackBSONReader extends BSONDocumentReader[TestCaseFeedback] {
@@ -77,7 +85,7 @@ object TestCaseFeedback {
     }
   }
   implicit object TestCaseConfigurationBSONWriter extends BSONDocumentWriter[TestCaseFeedback] {
-    def write(feedback:TestCaseFeedback): BSONDocument = {
+    def write(feedback: TestCaseFeedback): BSONDocument = {
       val timestamp = feedback.timestamp
       BSONDocument(
         "user" -> feedback.user,
@@ -96,17 +104,20 @@ case class TestCase(
   configurations: List[TestCaseConfiguration] = List(),
   feedback: List[TestCaseFeedback] = List(),
   score: Int = 10) {
-  
+
   def failedConfigsForBuild(buildNumber: Int) = {
     configurations.filter(_.failed.contains(buildNumber))
   }
-  
-  def withConfiguration(configuration: TestCaseConfiguration) = 
+
+  def withConfiguration(configuration: TestCaseConfiguration) =
     TestCase(id, configuration :: configurations, feedback, score)
-    
+
   def withFeedback(fb: TestCaseFeedback) =
-    TestCase(id, configurations, fb :: feedback, score)
-    
+    TestCase(id, configurations, fb :: feedback, calculateScore(fb :: feedback))
+
+  private def calculateScore(feedback: List[TestCaseFeedback]) =
+    10 + feedback.map(_.scoreDelta).sum
+  
 }
 
 object TestCase {
@@ -124,15 +135,15 @@ object TestCase {
     }
   }
   implicit object TestCaseBSONWriter extends BSONDocumentWriter[TestCase] {
-    def write(testCase:TestCase): BSONDocument = {
+    def write(testCase: TestCase): BSONDocument = {
       BSONDocument(
-      "_id" -> BSONDocument(
-        "suiteName" -> testCase.id.suiteName,
-        "className" -> testCase.id.className,
-        "testName" -> testCase.id.testName),
-      "configurations" -> testCase.configurations,
-      "feedback" -> testCase.feedback,
-      "score" -> testCase.score)
+        "_id" -> BSONDocument(
+          "suiteName" -> testCase.id.suiteName,
+          "className" -> testCase.id.className,
+          "testName" -> testCase.id.testName),
+        "configurations" -> testCase.configurations,
+        "feedback" -> testCase.feedback,
+        "score" -> testCase.score)
     }
   }
 }
