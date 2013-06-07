@@ -104,6 +104,9 @@ case class TestCase(
   def withConfiguration(configuration: TestCaseConfiguration) = 
     TestCase(id, configuration :: configurations, feedback, score)
     
+  def withFeedback(fb: TestCaseFeedback) =
+    TestCase(id, configurations, fb :: feedback, score)
+    
 }
 
 object TestCase {

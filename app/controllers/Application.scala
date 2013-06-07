@@ -61,25 +61,32 @@ object Application extends Controller with MongoController {
   }
 
   def submitFeedback(suite: String, className: String, test: String) = Action { implicit request =>
-    BadRequest("TODO")
-    /*
-    val (defect, codeChange, timing, comment) = feedbackForm.bindFromRequest.get
-
-    val action = for {
-      testcase <- TestCase.findOneById(TestCaseKey(suite, className, test))
-    } yield {
-      val mostRecentBuild = MetaInformation.findByKey("mostRecentBuildNumber").map(_.toInt).getOrElse(0)
-      val additionalData = Map(
-        "defect" -> defect,
-        "codeChange" -> codeChange,
-        "timing" -> timing).map { case (key, value) => (key, value.toString) }
-      val history = TestCaseHistory(mostRecentBuild, className, suite, test, comment, DateTime.now, additionalData)
-      TestCaseHistory.insert(history)
-      Redirect(routes.Application.viewDetails(suite, className, test))
-
+    Async {
+      val (defect, codeChange, timing, comment) = feedbackForm.bindFromRequest.get
+      val id = TestCaseKey(suite, className, test)
+      for {
+        currentBuildOpt <- MongoService.loadMetaInformation("mostRecentBuildNumber")
+        testCaseOpt <- MongoService.loadTestCaseByKey(id)
+      } yield {
+        val actionOpt = for {
+          currentBuild <- currentBuildOpt
+          testCase <- testCaseOpt
+        } yield {
+          val feedback = TestCaseFeedback(
+              "hugo", 
+              currentBuild.value.toInt, 
+              DateTime.now, 
+              defect, 
+              codeChange, 
+              timing, 
+              comment)
+          val updated = testCase.withFeedback(feedback)
+          MongoService.saveTestCase(updated)
+          Redirect(routes.Application.index)
+        }
+        actionOpt.getOrElse(NotFound("invalid test case id"))
+      }
     }
-    action.getOrElse(NotFound("testcase not found"))
-    */
   }
 
   def calc = Action {
