@@ -108,6 +108,9 @@ case class TestCase(
   def failedConfigsForBuild(buildNumber: Int) = {
     configurations.filter(_.failed.contains(buildNumber))
   }
+  
+  def passedConfigsForBuild(buildNumber: Int) = 
+    configurations.filter(_.passed.contains(buildNumber))
 
   def withConfiguration(configuration: TestCaseConfiguration) =
     TestCase(id, configuration :: configurations, feedback, score)

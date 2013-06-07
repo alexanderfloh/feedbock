@@ -6,15 +6,13 @@ import reactivemongo.bson._
 import reactivemongo.api.collections.default.BSONCollection
 import play.modules.reactivemongo.ReactiveMongoPlugin
 import play.api.Play.current
-import scala.concurrent.ExecutionContext
+import scala.concurrent.ExecutionContext.Implicits.global
 import models._
 
 object MongoService {
   /** Returns the default database (as specified in `application.conf`). */
   def db = ReactiveMongoPlugin.db
 
-  implicit def ec: ExecutionContext = ExecutionContext.Implicits.global
-  
   def testCases = db[BSONCollection]("testCases")
   def metaInformation = db[BSONCollection]("metaInformation")
   
@@ -30,6 +28,12 @@ object MongoService {
     val query = BSONDocument(
       "$orderby" -> BSONDocument("score" -> -1),
       "$query" -> BSONDocument("configurations.failed" -> build))
+    testCases.find(query).cursor[TestCase]
+  }
+  
+  def loadPassedTests(build: Int) = {
+    val query = BSONDocument(
+      "$query" -> BSONDocument("configurations.passed" -> build))
     testCases.find(query).cursor[TestCase]
   }
 

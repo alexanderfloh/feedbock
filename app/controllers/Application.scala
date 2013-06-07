@@ -1,38 +1,46 @@
 package controllers
 
-import models._
-import services._
-import org.joda.time.DateTime
-import scala.concurrent.Future
-import play.api._
-import play.api.data._
-import play.api.data.Forms._
-import play.api.Play.current
-import play.api.mvc._
-import play.modules.reactivemongo.{ MongoController, ReactiveMongoPlugin }
-import reactivemongo.api.gridfs.GridFS
-import reactivemongo.api.gridfs.Implicits.DefaultReadFileReader
-import reactivemongo.api.collections.default.BSONCollection
-import reactivemongo.bson._
-import scala.concurrent.duration.Duration
 import scala.concurrent.Await
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.concurrent.duration.Duration
 
-object Application extends Controller with MongoController {
+import org.joda.time.DateTime
+
+import models.MetaInformation
+import models.TestCaseFeedback
+import models.TestCaseHistory
+import models.TestCaseKey
+import play.api.Play
+import play.api.data.Form
+import play.api.data.Forms.boolean
+import play.api.data.Forms.text
+import play.api.data.Forms.tuple
+import play.api.mvc.Action
+import play.api.mvc.Controller
+import services.MongoService
+
+object Application extends Controller {
 
   val jobUrl = Play.current.configuration.getString("jenkins.jobUrl")
 
-  val collection = db[BSONCollection]("testCases")
-
   def index = Action {
-    val mostRecentBuild = Await.result(MongoService.loadMetaInformation("mostRecentBuildNumber"), Duration.Inf).getOrElse(MetaInformation("mostRecentBuildNumber", "0"))
+
     Async {
-      val history = List[BuildHistory]()
-      val builds = history.map(_.buildNumber)
-      val passedTests = history.map(_.value("passedTests"))
-      val passedCount = 10 // TestCase.findByBuildAndStatus(build.toInt, "Passed").size
-      val failed = Await.result(MongoService.loadFailedTestsSortedByScoreDesc(mostRecentBuild.value.toInt).toList, Duration.Inf)
-      val failedWithDetails = failed.map(tc => (tc, generateDetailsView(tc.id)))
-      Future(Ok(views.html.index(passedCount, mostRecentBuild.value.toInt, failedWithDetails, builds, passedTests)))
+      val buildFuture = MongoService.loadMetaInformation("mostRecentBuildNumber")
+      buildFuture.flatMap { buildOpt =>
+        buildOpt.map { buildMeta =>
+          val build = buildMeta.value.toInt
+          for {
+            passedTests <- MongoService.loadPassedTests(build).toList
+            failed <- MongoService.loadFailedTestsSortedByScoreDesc(build).toList
+          } yield {
+            val passedScore = passedTests.map(tc => tc.score * tc.passedConfigsForBuild(build).size).sum
+            val failedWithDetails = failed.map(tc => (tc, generateDetailsView(tc.id)))
+            Ok(views.html.index(passedScore, build, failedWithDetails))
+          }
+        }.getOrElse(Future(BadRequest("unable to access meta information")))
+      }
     }
   }
 
@@ -73,13 +81,13 @@ object Application extends Controller with MongoController {
           testCase <- testCaseOpt
         } yield {
           val feedback = TestCaseFeedback(
-              "hugo", 
-              currentBuild.value.toInt, 
-              DateTime.now, 
-              defect, 
-              codeChange, 
-              timing, 
-              comment)
+            "hugo",
+            currentBuild.value.toInt,
+            DateTime.now,
+            defect,
+            codeChange,
+            timing,
+            comment)
           val updated = testCase.withFeedback(feedback)
           MongoService.saveTestCase(updated)
           Redirect(routes.Application.index)

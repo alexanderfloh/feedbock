@@ -1,8 +1,6 @@
 @(passedCount: Int, 
   currentBuild: Int, 
-  testCases: List[(TestCase, Html)], 
-  builds: List[Int], 
-  passedTests: List[Int])
+  testCases: List[(TestCase, Html)])
   
 <!doctype html>
 <html>
@@ -36,12 +34,12 @@
 			</header>
 			<div class="build-info">
 				<div>
-					<span>Tests passed</span>
-					<p>@passedCount</p>
-				</div>
-				<div>
 					<span>Build</span>
 					<p>@currentBuild</p>
+				</div>
+				<div>
+					<span>Score</span>
+					<p>@passedCount</p>
 				</div>
 			</div>
 			<ul class="graph">
