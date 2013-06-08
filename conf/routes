@@ -4,9 +4,6 @@
 
 # Home page
 GET     / controllers.Application.index
-GET     /details/:suite/:clazz/:test controllers.Application.viewDetails(suite: String, clazz: String, test: String)
-
-GET     /loadBuild/:buildNumber controllers.Application.loadBuild(buildNumber: Int)
 
 POST    /submitFeedback/:suite/:className/:test controllers.Application.submitFeedback(suite: String, className: String, test: String)
 

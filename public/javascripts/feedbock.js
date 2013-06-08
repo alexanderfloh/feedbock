@@ -24,9 +24,9 @@ $(function() {
 			$('.active').removeClass('active');
 			$this.addClass('active');
 			$('#details').html($this.find('.details').html());
+			$('#details').show();
 			var distanceToTop = $this.position().top - 100;
-			$('#details').show()
-				.css('margin-top', distanceToTop);
+			$('#details').css('margin-top', distanceToTop);
 		}
 	});
 
