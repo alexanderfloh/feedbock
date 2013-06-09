@@ -25,12 +25,11 @@ import play.api.mvc.RequestHeader
 import services.MongoService
 import models.TestCase
 
-object Application extends Controller {
+object Application extends Controller with Secured {
 
   val jobUrl = Play.current.configuration.getString("jenkins.jobUrl")
 
-  def index = Action {
-
+  def index = IsAuthenticated { user => request =>
     Async {
       val buildFuture = MongoService.loadMetaInformation("mostRecentBuildNumber")
       buildFuture.flatMap { buildOpt =>
@@ -53,8 +52,19 @@ object Application extends Controller {
     }
   }
 
+  /**
+   * Handle login form submission.
+   */
+  def authenticate = Action { 
+    Results.Redirect(routes.Application.index).withSession("userId" -> "bert")
+  }
+
   def login = Action {
-    BadRequest("TODO - implement login")
+    Ok(views.html.signIn(false))
+  }
+
+  def logout = Action {
+    Results.Redirect(routes.Application.login).withNewSession
   }
 
   def submitFeedback(suite: String, className: String, test: String) = Action { implicit request =>

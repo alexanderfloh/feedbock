@@ -30,6 +30,10 @@ $(function() {
 		}
 	});
 
+	$('.feedbock-logout-link').on('click', function() {
+		$(".feedbock-logout-form").submit();
+	})
+
 
 
 });
