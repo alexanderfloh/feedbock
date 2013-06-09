@@ -1,14 +1,13 @@
-import com.mongodb.casbah.Imports._
-import play.api._
-import libs.ws.WS
-import models._
-import se.radley.plugin.salat._
-import play.libs.Akka
-import akka.actor.Props
+import scala.concurrent.duration.DurationInt
+
 import actors.TestResultLoadActor
-import concurrent.duration._
-import play.api.libs.concurrent.Execution.Implicits._
-import org.joda.time.DateTime
+import akka.actor.Props
+import play.api.Application
+import play.api.GlobalSettings
+import play.api.Logger
+import play.api.Play
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
+import play.libs.Akka
 
 object Global extends GlobalSettings {
   override def onStart(app: Application) {
@@ -19,11 +18,6 @@ object Global extends GlobalSettings {
       Logger.info("result auto-loading disabled in config file")
     }
     //Akka.system.scheduler.schedule(0.seconds, 5.minutes, actor, actors.UpdateScores)
-
-    import com.mongodb.casbah.commons.conversions.scala._
-    RegisterJodaTimeConversionHelpers()
-    RegisterConversionHelpers()
-
   }
 
   override def onStop(app: Application) {

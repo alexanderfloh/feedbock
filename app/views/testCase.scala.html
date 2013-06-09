@@ -1,4 +1,5 @@
 @(testCase: TestCase,
+  details: Html,
   currentBuild: Int)
 <li>
 	<a href="/details/@testCase.id.toUrlPart"></a>
@@ -18,6 +19,6 @@
 		<span>score</span>
 	</div>
 
-	@controllers.Application.generateDetailsView(testCase.id.suiteName, testCase.id.className, testCase.id.testName)
+	@details
 
 </li>

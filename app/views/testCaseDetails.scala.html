@@ -29,19 +29,19 @@
 
 	<ul class="history">
 		<header>history</header>
-		@*
-		@history.map { historyEntry => 
+		
+		@testCase.feedback.map { fb => 
 		<li>
 			<div class="properties">
-				@if(historyEntry.isCodeChange) { <i class="icon-code" title="code change"></i> }
-				@if(historyEntry.isTiming) { <i class="icon-time" title="timing issue"></i> }
-				@if(historyEntry.isDefect) { <i class="icon-remove" title="defect"></i> }
+				@if(fb.codeChange) { <i class="icon-code" title="code change"></i> }
+				@if(fb.timingIssue) { <i class="icon-time" title="timing issue"></i> }
+				@if(fb.defect) { <i class="icon-remove" title="defect"></i> }
 			</div>
-			<h3>@historyEntry.buildNumber</h3>
-			<p>@historyEntry.comment</p>
+			<h3>@fb.build</h3>
+			<p>@fb.comment</p>
 		</li>
 		}
-		*@
+		
 	</ul>
 
 	<div class="comments">
@@ -51,8 +51,25 @@
 			<i class="icon-time" title="timing issue"></i>
 			<i class="icon-remove" title="defect"></i>
 		</div>
-		<p>this is my comment. teh lols.</p>
-		<p>who am i? who are you?!?!</p>
-		<textarea placeholder="Be the first to comment..."></textarea>
+		@helper.form(action = 
+			routes.Application.submitFeedback(
+				testCase.id.suiteName, 
+				testCase.id.className, 
+				testCase.id.testName)) {
+			<label>Defect
+				<input type="checkbox" name="defect" value="true" /> 
+			</label><br/>
+			<label>Code Change
+				<input type="checkbox" name="codeChange" value="true" />
+			</label><br/>
+			<label>Timing Issue
+				<input type="checkbox" name="timing" value="true" />
+			</label><br/>
+			<label>Comment
+				<textarea placeholder="Be the first to comment..." name="comment"></textarea>
+			</label>
+			
+			<input type="submit" />
+		}
 	</div>
 </div>

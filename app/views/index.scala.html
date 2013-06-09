@@ -1,8 +1,6 @@
 @(passedCount: Int, 
   currentBuild: Int, 
-  testCases: List[TestCase], 
-  builds: List[Int], 
-  passedTests: List[Int])
+  testCases: List[(TestCase, Html)])
   
 <!doctype html>
 <html>
@@ -10,7 +8,8 @@
 	<title>feedbock</title>
 
 	<link rel="stylesheet" href="assets/stylesheets/feedbock.css">
-	<script src="http://code.jquery.com/jquery-1.10.0.min.js"></script>
+	<link rel="shortcut icon" href="/assets/images/favicon.ico">
+	<script src="@routes.Assets.at("javascripts/jquery-1.10.0.min.js")"></script>
 	<script src="assets/javascripts/feedbock.js"></script>
 
 </head>
@@ -29,19 +28,18 @@
 	</header>
 
 	<div class="content">
-
 		<section class="status">
 			<header>
 				Looking good.
 			</header>
 			<div class="build-info">
 				<div>
-					<span>Tests passed</span>
-					<p>@passedCount</p>
-				</div>
-				<div>
 					<span>Build</span>
 					<p>@currentBuild</p>
+				</div>
+				<div>
+					<span>Score</span>
+					<p>@passedCount</p>
 				</div>
 			</div>
 			<ul class="graph">
@@ -49,14 +47,13 @@
 				<li><span style="height: 20%"></span></li>
 				<li><span style="height: 60%"></span></li>
 				<li><span style="height: 85%"></span></li>
-				<li><span style="height: 70%"></span></li>
 			</ul>
 		</section>
 
 
 		<ul class="tests">
-		    @testCases.map{ tc =>
-		      @views.html.testCase(tc, currentBuild)
+		    @testCases.map{ case (tc, details) =>
+		      @views.html.testCase(tc, details, currentBuild)
 		    }
 		</ul>
 
