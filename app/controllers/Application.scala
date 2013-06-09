@@ -1,5 +1,11 @@
 package controllers
 
+import play.api._
+import play.api.mvc._
+import play.api.data._
+import play.api.data.Forms._
+
+
 import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -8,13 +14,14 @@ import org.joda.time.DateTime
 import models.MetaInformation
 import models.TestCaseFeedback
 import models.TestCaseKey
-import play.api.Play
+import play.api._
 import play.api.data.Form
 import play.api.data.Forms.boolean
 import play.api.data.Forms.text
 import play.api.data.Forms.tuple
 import play.api.mvc.Action
 import play.api.mvc.Controller
+import play.api.mvc.RequestHeader
 import services.MongoService
 import models.TestCase
 
@@ -44,6 +51,10 @@ object Application extends Controller {
         }.getOrElse(Future(BadRequest("unable to access meta information")))
       }
     }
+  }
+
+  def login = Action {
+    BadRequest("TODO - implement login")
   }
 
   def submitFeedback(suite: String, className: String, test: String) = Action { implicit request =>
@@ -81,5 +92,17 @@ object Application extends Controller {
       "codeChange" -> boolean,
       "timing" -> boolean,
       "comment" -> text))
+
+}
+
+trait Secured {
+  
+  private def userId(request: RequestHeader) = request.session.get("userId")
+
+  private def onUnauthorized(request: RequestHeader) = Results.Redirect(routes.Application.login)
+
+  def IsAuthenticated(f: => String => Request[AnyContent] => Result) = Security.Authenticated(userId, onUnauthorized) { user =>
+    Action(request => f(user)(request))
+  }
 
 }
