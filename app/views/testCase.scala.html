@@ -12,7 +12,7 @@
 		@Html(testCase.id.testNameWithBreakHints)
 	</p>
 	<p class="plattforms">
-		@Html(testCase.failedConfigsForBuild(currentBuild).map(_.name).mkString(", <wbr/>")))
+		@Html(testCase.failedConfigsForBuild(currentBuild).map(_.name).mkString(", <wbr/>"))
 	</p>
 	<div class="score">
 		@testCase.score
