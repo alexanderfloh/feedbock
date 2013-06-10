@@ -31,7 +31,7 @@ $(function() {
 	});
 
 	$('.feedbock-logout-link').on('click', function() {
-		$(".feedbock-logout-form").submit();
+		$('.feedbock-logout-form').submit();
 	});
 
 });
