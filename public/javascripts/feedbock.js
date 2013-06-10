@@ -11,7 +11,7 @@ $(function() {
 
 	$('#details').on('click', '[data-action=close]', function () { _hide(); } );
 
-	$('.tests li').on('click', function () {
+	$('.tests').on('click', 'li', function () {
 		var $this = $(this);
 
 		// hide
@@ -32,9 +32,7 @@ $(function() {
 
 	$('.feedbock-logout-link').on('click', function() {
 		$(".feedbock-logout-form").submit();
-	})
-
-
+	});
 
 });
 
