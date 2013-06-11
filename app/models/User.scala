@@ -16,7 +16,7 @@ object User {
         user.getAs[String]("_id").get,
         user.getAs[String]("alias").get,
         user.getAs[String]("password").get,
-        new DateTime(user.getAs[BSONDateTime]("createDate").get)
+        new DateTime(user.getAs[BSONDateTime]("createDate").get.value)
       )
     }
   }

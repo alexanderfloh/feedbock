@@ -1,19 +1,10 @@
 package controllers
 
-import play.api._
 import play.api.mvc._
-import play.api.data._
-import play.api.data.Forms._
-
-
-import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, Future}
 import org.joda.time.DateTime
-import models.MetaInformation
-import models.TestCaseFeedback
-import models.TestCaseKey
+import models.{User, TestCaseFeedback, TestCaseKey, TestCase}
 import play.api._
 import play.api.data.Form
 import play.api.data.Forms.boolean
@@ -23,7 +14,7 @@ import play.api.mvc.Action
 import play.api.mvc.Controller
 import play.api.mvc.RequestHeader
 import services.MongoService
-import models.TestCase
+import scala.concurrent.duration.Duration
 
 object Application extends Controller with Secured {
 
@@ -45,7 +36,8 @@ object Application extends Controller with Secured {
               views.html.testCaseDetails(testCase, mostRecentBuildNumber, feedbackForm)
 
             val failedWithDetails = failed.map(tc => (tc, generateDetailsView(tc, build)))
-            Ok(views.html.index(passedScore, build, failedWithDetails))
+            val result = Await.result(MongoService.loadUser(user), Duration.Inf)
+            Ok(views.html.index(passedScore, build, failedWithDetails, result.get.alias))
           }
         }.getOrElse(Future(BadRequest("unable to access meta information")))
       }
@@ -56,11 +48,18 @@ object Application extends Controller with Secured {
    * Handle login form submission.
    */
   def authenticate = Action { implicit request =>
-    val (user, password) = signinForm.bindFromRequest.get
-    println("user: " + user)
-    println("password: " + password)
+      val (user, password) = signinForm.bindFromRequest.get
+      println("user: " + user)
+      println("password: " + password)
 
-    Results.Redirect(routes.Application.index).withSession("userId" -> "bert")
+      Async {
+        val userFuture = MongoService.loadUser(user)
+        userFuture.flatMap { userOpt =>
+          userOpt.map { user =>
+            Future(Results.Redirect(routes.Application.index).withSession("userId" -> user.globalId))
+          }.getOrElse(Future(BadRequest("user is invalid")))
+      }
+    }
   }
 
   def login = Action {

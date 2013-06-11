@@ -1,6 +1,7 @@
 @(passedCount: Int, 
   currentBuild: Int, 
-  testCases: List[(TestCase, Html)])
+  testCases: List[(TestCase, Html)],
+  user: String)
   
 <!doctype html>
 <html>
@@ -17,7 +18,7 @@
 	
 	<header>
 		<nav>
-			<a class="feedbock-logout-link" href="#">logout</a>&nbsp;|
+			<a class="feedbock-logout-link" href="#">logout @user</a>&nbsp;|
 			<a href="about.html">about</a>&nbsp;|
 			<a href="mailto:alexander.floh-at-gamil.com">contact</a>
 		</nav>
