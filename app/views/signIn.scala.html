@@ -1,4 +1,4 @@
-@(showRetryWarning: Boolean)
+@(showRetryWarning: Boolean, signinForm: Form[(String, String)])
 <!DOCTYPE html>
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta charset="utf-8">
@@ -24,7 +24,6 @@
         max-width: 300px;
         padding: 19px 29px 29px;
         margin: 0 auto 20px;
-        background-color: #fff;
         border: 1px solid #e5e5e5;
         -webkit-border-radius: 10px;
            -moz-border-radius: 10px;
@@ -32,6 +31,7 @@
         -webkit-box-shadow: 0 1px 2px rgba(0,0,0,.05);
            -moz-box-shadow: 0 1px 2px rgba(0,0,0,.05);
                 box-shadow: 0 1px 2px rgba(0,0,0,.05);
+        background: #555555;
       }
       .form-signin .form-signin-heading,
       .form-signin .checkbox {
@@ -50,19 +50,21 @@
   </head>
   <body onload="document.getElementById('user').focus()">
     <div class="container">
-      <form class="form-signin" style="background:#555555" method="POST" action="/authenticate">
+      @helper.form(action =
+      routes.Application.authenticate(
+        ), 'class -> "form-signin") {
         <div class="alert hide">
           <button type="button" class="close" data-dismiss="alert">&times;</button>
           <strong>Warning!</strong> Last login attempt failed. - Try again! Contact <a href="mailto:...">Feedbock Admin</a> if you need help.
         </div>
         <input name="user" id="user" type="text" class="input-block-level" placeholder="Feedbock user" style="margin-top:1em" autocomplete="off">
-        <input name="user" id="user" type="password" class="input-block-level" placeholder="password">
+        <input name="password" type="password" class="input-block-level" placeholder="password">
         <button class="btn btn-large btn-primary" type="submit" style="background:#F27B36" title="sign in with the credentials given above">sign in...</button>
         <img src="/assets/images/feedbock.svg" style="margin-left:1em;width:89;height:80" width="89" height="80" />
         <p>
           ...or use the limited <a href="/public">public access</a>
         <p>
           <a href="/about">about</a> | <a href="mailto:...">contact</a>
-      </form>
+      }
     </div>
 </body></html>

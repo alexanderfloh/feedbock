@@ -55,12 +55,16 @@ object Application extends Controller with Secured {
   /**
    * Handle login form submission.
    */
-  def authenticate = Action {
+  def authenticate = Action { implicit request =>
+    val (user, password) = signinForm.bindFromRequest.get
+    println("user: " + user)
+    println("password: " + password)
+
     Results.Redirect(routes.Application.index).withSession("userId" -> "bert")
   }
 
   def login = Action {
-    Ok(views.html.signIn(false))
+    Ok(views.html.signIn(false, signinForm))
   }
 
   def logout = Action {
@@ -103,6 +107,10 @@ object Application extends Controller with Secured {
       "timing" -> boolean,
       "comment" -> text))
 
+  val signinForm = Form(
+    tuple(
+      "user" -> text,
+      "password" -> text))
 }
 
 trait Secured {
