@@ -56,14 +56,20 @@ object Application extends Controller with Secured {
         val userFuture = MongoService.loadUser(user)
         userFuture.flatMap { userOpt =>
           userOpt.map { user =>
-            Future(Results.Redirect(routes.Application.index).withSession("userId" -> user.globalId))
-          }.getOrElse(Future(BadRequest("user is invalid")))
+            if (user.password == password) {
+              Future(Results.Redirect(routes.Application.index).withSession("userId" -> user.globalId))
+            } else {
+              Future(Results.Redirect(routes.Application.login).withSession("lastLoginFailed" -> "yes"))
+            }
+          }.getOrElse(Future(Results.Redirect(routes.Application.login).withSession("lastLoginFailed" -> "yes")))
       }
     }
   }
 
-  def login = Action {
-    Ok(views.html.signIn(false, signinForm))
+  def login = Action { implicit request =>
+    session.get("lastLoginFailed").map { lastLoginFailed =>
+      Ok(views.html.signIn(lastLoginFailed == "yes", signinForm))
+    }.getOrElse(Ok(views.html.signIn(false, signinForm)))
   }
 
   def logout = Action {

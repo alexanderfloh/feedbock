@@ -53,7 +53,7 @@
       @helper.form(action =
       routes.Application.authenticate(
         ), 'class -> "form-signin") {
-        <div class="alert hide">
+        <div class="alert@if(!showRetryWarning) { hide}">
           <button type="button" class="close" data-dismiss="alert">&times;</button>
           <strong>Warning!</strong> Last login attempt failed. - Try again! Contact <a href="mailto:...">Feedbock Admin</a> if you need help.
         </div>
