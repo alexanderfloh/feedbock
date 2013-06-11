@@ -1,11 +1,6 @@
 package models
 
-import org.jboss.netty.buffer._
 import org.joda.time.DateTime
-import play.api.data._
-import play.api.data.Forms._
-import play.api.data.format.Formats._
-import play.api.data.validation.Constraints._
 import reactivemongo.bson._
 
 case class User(
@@ -13,3 +8,26 @@ case class User(
   alias: String,
   password: String,
   createDate: DateTime)
+
+object User {
+  implicit object UserBSONReader extends BSONDocumentReader[User] {
+    def read(user: BSONDocument): User = {
+      User(
+        user.getAs[String]("_id").get,
+        user.getAs[String]("alias").get,
+        user.getAs[String]("password").get,
+        new DateTime(user.getAs[BSONDateTime]("createDate").get)
+      )
+    }
+  }
+  implicit object UserBSONWriter extends BSONDocumentWriter[User] {
+    def write(user: User): BSONDocument = {
+      BSONDocument(
+        "_id" -> user.globalId,
+        "alias" -> user.alias,
+        "password" -> user.password,
+        "createDate" -> BSONDateTime(user.createDate.getMillis)
+      )
+    }
+  }
+}

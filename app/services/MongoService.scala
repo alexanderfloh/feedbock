@@ -15,6 +15,7 @@ object MongoService {
 
   def testCases = db[BSONCollection]("testCases")
   def metaInformation = db[BSONCollection]("metaInformation")
+  def users = db[BSONCollection]("users")
   
   def loadTestCaseByKey(key: TestCaseKey) = {
     val query = BSONDocument("_id" -> BSONDocument(
@@ -49,6 +50,12 @@ object MongoService {
 
   def saveMetaInformation(doc: MetaInformation) = {
     metaInformation.save(doc)
+  }
+
+  def loadUser(key: String) = {
+    val query = BSONDocument(
+      "_id" -> key)
+    users.find(query).cursor[User].headOption
   }
 
 }
