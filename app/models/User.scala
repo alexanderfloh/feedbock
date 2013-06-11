@@ -11,19 +11,5 @@ import reactivemongo.bson._
 case class User(
   globalId: String,
   alias: String,
-  emailAdresses: List[UserEmail],
-  passwordAuthentication: Option[UserPasswordAuthentication],
-  isAdmin: Boolean,
-  sessions: List[UserSession],
+  password: String,
   createDate: DateTime)
-
-case class UserPasswordAuthentication(
-  password: String)
-
-case class UserSession(
-  sessionId: String,
-  createDate: DateTime,
-  lastActivity: DateTime)
-
-case class UserEmail(
-  email: String)

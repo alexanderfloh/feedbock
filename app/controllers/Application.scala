@@ -55,7 +55,7 @@ object Application extends Controller with Secured {
   /**
    * Handle login form submission.
    */
-  def authenticate = Action { 
+  def authenticate = Action {
     Results.Redirect(routes.Application.index).withSession("userId" -> "bert")
   }
 
