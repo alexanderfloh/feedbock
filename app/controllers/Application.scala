@@ -49,9 +49,6 @@ object Application extends Controller with Secured {
    */
   def authenticate = Action { implicit request =>
       val (user, password) = signinForm.bindFromRequest.get
-      println("user: " + user)
-      println("password: " + password)
-
       Async {
         val userFuture = MongoService.loadUser(user)
         userFuture.flatMap { userOpt =>
