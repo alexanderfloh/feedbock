@@ -36,8 +36,8 @@ object Application extends Controller with Secured {
               views.html.testCaseDetails(testCase, mostRecentBuildNumber, feedbackForm)
 
             val failedWithDetails = failed.map(tc => (tc, generateDetailsView(tc, build)))
-            val result = Await.result(MongoService.loadUser(user), Duration.Inf)
-            Ok(views.html.index(passedScore, build, failedWithDetails, result.get.alias))
+            val userObj = Await.result(MongoService.loadUser(user), Duration.Inf)
+            Ok(views.html.index(passedScore, build, failedWithDetails, userObj.get.alias))
           }
         }.getOrElse(Future(BadRequest("unable to access meta information")))
       }
@@ -76,8 +76,9 @@ object Application extends Controller with Secured {
     Results.Redirect(routes.Application.login).withNewSession
   }
 
-  def submitFeedback(suite: String, className: String, test: String) = Action { implicit request =>
+  def submitFeedback(suite: String, className: String, test: String) = IsAuthenticated { user => implicit request =>
     Async {
+      val userObj = Await.result(MongoService.loadUser(user), Duration.Inf)
       val (defect, codeChange, timing, comment) = feedbackForm.bindFromRequest.get
       val id = TestCaseKey(suite, className, test)
       for {
@@ -89,7 +90,8 @@ object Application extends Controller with Secured {
           testCase <- testCaseOpt
         } yield {
           val feedback = TestCaseFeedback(
-            "hugo",
+            userObj.get.globalId,
+            userObj.get.alias,
             currentBuild.value.toInt,
             DateTime.now,
             defect,

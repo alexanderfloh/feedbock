@@ -54,6 +54,7 @@ object TestCaseConfiguration {
 
 case class TestCaseFeedback(
   user: String,
+  alias: String,
   build: Int,
   timestamp: DateTime,
   defect: Boolean,
@@ -76,6 +77,7 @@ object TestCaseFeedback {
       val timestamp = doc.getAs[BSONDateTime]("timestamp").get
       TestCaseFeedback(
         doc.getAs[String]("user").get,
+        doc.getAs[String]("alias").get,
         doc.getAs[Int]("build").get,
         new DateTime(timestamp.value),
         doc.getAs[Boolean]("defect").get,
@@ -89,6 +91,7 @@ object TestCaseFeedback {
       val timestamp = feedback.timestamp
       BSONDocument(
         "user" -> feedback.user,
+        "alias" -> feedback.alias,
         "build" -> feedback.build,
         "timestamp" -> BSONDateTime(timestamp.getMillis),
         "defect" -> feedback.defect,
