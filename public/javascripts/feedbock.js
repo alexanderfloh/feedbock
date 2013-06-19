@@ -1,43 +1,67 @@
-
 $(function() {
+
+	History.Adapter.bind(window, 'statechange', function() {
+		var historyState = History.getState();
+		if (historyState.data.state === undefined) {
+			_hideDetails();
+		} else if (historyState.data.state === 'details') {
+			if ($("li.active").size() == 0) {
+				_setPreviousToActive();
+			}
+			_showDetails();
+		}
+	});
 	
-	History.Adapter.bind(window,'statechange',function(){ // Note: We are using statechange instead of popstate
-        var State = History.getState(); // Note: We are using History.getState() instead of event.state
-        console.log("State = " + JSON.stringify(State, null, "\t"));
-        if (State.data.state === undefined) {
-        	console.log("call _hide()")
-        	_hide($("li.active"));
-        }
-    });
+	var _showDetails = function() {
+		var $element = $("li.active");
+		$('body').addClass('details-open');
+		$('#details').html($element.find('.details').html());
+		
+		$('#details').show();
+		if ($element.position()) {
+			var distanceToTop = $element.position().top - 100;
+			$('#details').css('margin-top', distanceToTop);
+		}
+	};
 
-
-	var _hide = function($element) {
+	var _hideDetails = function() {
 		$('body').removeClass('details-open');
+		var $element = $("li.active");
 		if ($element) {
-			$element.removeClass('active');
+			_setActiveToPrevious($element);
 		}
 		$('#details').hide();
 	};
+	
+	var _setActiveToPrevious = function($element) {
+		$prev = $('previous');
+		if ($prev) {
+			$prev.removeClass('previous');
+		}
+		
+		$element.addClass('previous');
+		$element.removeClass('active');
+	};
+	
+	var _setPreviousToActive = function() {
+		var $element = $("li.previous");
+		if ($element) {
+			$element.addClass('active');
+			$element.removeClass('previous');
+		}
+	};
 
-	$('#details').on('click', '[data-action=close]', function () { _hide(); } );
+	$('#details').on('click', '[data-action=close]', function() {
+		_hideDetails();
+	});
 
-	$('.tests').on('click', 'li', function () {
+	$('.tests').on('click', 'li', function() {
 		var $this = $(this);
-
-		// hide
 		if ($this.hasClass('active')) {
-			_hide($this);
-			console.log("hide");
-		// show
+			History.back();
 		} else {
-			$('body').addClass('details-open');
-			$('.active').removeClass('active');
-			$this.addClass('active');
-			$('#details').html($this.find('.details').html());
-			$('#details').show();
-			var distanceToTop = $this.position().top - 100;
-			$('#details').css('margin-top', distanceToTop);
-			History.pushState({state: "details"}, "State details", "?state=details");
+			$(this).addClass('active');
+			History.pushState({state : "details"}, "feedbock - test details", "?state=details");
 		}
 	});
 
@@ -46,4 +70,3 @@ $(function() {
 	});
 
 });
-
