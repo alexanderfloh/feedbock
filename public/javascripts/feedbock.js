@@ -1,5 +1,15 @@
 
 $(function() {
+	
+	History.Adapter.bind(window,'statechange',function(){ // Note: We are using statechange instead of popstate
+        var State = History.getState(); // Note: We are using History.getState() instead of event.state
+        console.log("State = " + JSON.stringify(State, null, "\t"));
+        if (State.data.state === undefined) {
+        	console.log("call _hide()")
+        	_hide($("li.active"));
+        }
+    });
+
 
 	var _hide = function($element) {
 		$('body').removeClass('details-open');
@@ -17,7 +27,7 @@ $(function() {
 		// hide
 		if ($this.hasClass('active')) {
 			_hide($this);
-
+			console.log("hide");
 		// show
 		} else {
 			$('body').addClass('details-open');
@@ -27,6 +37,7 @@ $(function() {
 			$('#details').show();
 			var distanceToTop = $this.position().top - 100;
 			$('#details').css('margin-top', distanceToTop);
+			History.pushState({state: "details"}, "State details", "?state=details");
 		}
 	});
 
