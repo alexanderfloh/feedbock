@@ -5,7 +5,7 @@ $(function() {
 		if (historyState.data.state === undefined) {
 			_hideDetails();
 		} else if (historyState.data.state === 'details') {
-			if ($("li.active").size() == 0) {
+			if ($('li.active').size() == 0) {
 				_setPreviousToActive();
 			}
 			_showDetails();
@@ -13,7 +13,7 @@ $(function() {
 	});
 	
 	var _showDetails = function() {
-		var $element = $("li.active");
+		var $element = $('li.active');
 		$('body').addClass('details-open');
 		$('#details').html($element.find('.details').html());
 		
@@ -26,7 +26,7 @@ $(function() {
 
 	var _hideDetails = function() {
 		$('body').removeClass('details-open');
-		var $element = $("li.active");
+		var $element = $('li.active');
 		if ($element) {
 			_setActiveToPrevious($element);
 		}
@@ -34,8 +34,8 @@ $(function() {
 	};
 	
 	var _setActiveToPrevious = function($element) {
-		$prev = $('previous');
-		if ($prev) {
+		$prev = $('li.previous');
+		if ($prev.length > 0) {
 			$prev.removeClass('previous');
 		}
 		
@@ -44,13 +44,13 @@ $(function() {
 	};
 	
 	var _setPreviousToActive = function() {
-		var $element = $("li.previous");
+		var $element = $('li.previous');
 		if ($element) {
 			$element.addClass('active');
 			$element.removeClass('previous');
 		}
 	};
-
+	
 	$('#details').on('click', '[data-action=close]', function() {
 		_hideDetails();
 	});
@@ -61,7 +61,7 @@ $(function() {
 			History.back();
 		} else {
 			$(this).addClass('active');
-			History.pushState({state : "details"}, "feedbock - test details", "?state=details");
+			History.pushState({state : 'details'}, 'feedbock - test details', '?state=details');
 		}
 	});
 
