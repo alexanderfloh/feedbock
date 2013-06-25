@@ -1,5 +1,4 @@
 import scala.concurrent.duration.DurationInt
-
 import actors.TestResultLoadActor
 import akka.actor.Props
 import play.api.Application
@@ -8,6 +7,10 @@ import play.api.Logger
 import play.api.Play
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.libs.Akka
+import play.api.Mode
+import org.joda.time.DateTime
+import models.User
+import services.MongoService
 
 object Global extends GlobalSettings {
   override def onStart(app: Application) {
@@ -17,7 +20,11 @@ object Global extends GlobalSettings {
     } else {
       Logger.info("result auto-loading disabled in config file")
     }
-    //Akka.system.scheduler.schedule(0.seconds, 5.minutes, actor, actors.UpdateScores)
+
+    if (Play.current.mode == Mode.Dev) {
+      val defaultUser = User("admin", "Default User", "default", DateTime.now)
+      MongoService.create(defaultUser)
+    }
   }
 
   override def onStop(app: Application) {

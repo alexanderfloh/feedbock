@@ -11,12 +11,12 @@ import models._
 
 object MongoService {
   /** Returns the default database (as specified in `application.conf`). */
-  def db = ReactiveMongoPlugin.db
+  private def db = ReactiveMongoPlugin.db
 
-  def testCases = db[BSONCollection]("testCases")
-  def metaInformation = db[BSONCollection]("metaInformation")
-  def users = db[BSONCollection]("users")
-  
+  private def testCases = db[BSONCollection]("testCases")
+  private def metaInformation = db[BSONCollection]("metaInformation")
+  private def users = db[BSONCollection]("users")
+
   def loadTestCaseByKey(key: TestCaseKey) = {
     val query = BSONDocument("_id" -> BSONDocument(
       "suiteName" -> key.suiteName,
@@ -31,7 +31,7 @@ object MongoService {
       "$query" -> BSONDocument("configurations.failed" -> build))
     testCases.find(query).cursor[TestCase]
   }
-  
+
   def loadPassedTests(build: Int) = {
     val query = BSONDocument(
       "$query" -> BSONDocument("configurations.passed" -> build))
@@ -56,6 +56,10 @@ object MongoService {
     val query = BSONDocument(
       "_id" -> key)
     users.find(query).cursor[User].headOption
+  }
+
+  def create(user: User) = {
+    users.save(user)
   }
 
 }
