@@ -19,9 +19,12 @@ html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abb
 }
 
 @grey: hsl(214, 20%, 93%);
-@darkgrey: hsl(215, 16%, 15%);
-@green: hsl(172, 100%, 37%);
+//@darkgrey: hsl(215, 16%, 15%);
+@darkgrey: #2c3e50;
+//@green: hsl(172, 100%, 37%);
+@green: #3498db;
 @orange: hsl(22, 88%, 58%);
+//@orange: #d35400;
 
 .flex-container {
 	display: -webkit-box;      /* OLD - iOS 6-, Safari 3.1-6 */
@@ -143,7 +146,7 @@ body > header {
 
 .status {
 	width: 280px;
-	border-radius: 5px;
+	//border-radius: 5px;
 	background: white;
 	margin-right: 30px;
 	padding: 20px;
@@ -203,7 +206,7 @@ body > header {
 			background: @grey;
 			margin-right: 20px;
 			position: relative;
-			border-radius: 3px;
+			//border-radius: 3px;
 			&:last-child {
 				margin-right: 0;
 				> * {
@@ -218,7 +221,7 @@ body > header {
 				bottom: 0;
 				left: 0;
 				right: 0;
-				border-radius: 3px;
+				//border-radius: 3px;
 			}
 		}
 	}
