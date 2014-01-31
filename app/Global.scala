@@ -21,10 +21,6 @@ object Global extends GlobalSettings {
       Logger.info("result auto-loading disabled in config file")
     }
 
-    if (Play.current.mode == Mode.Dev) {
-      val defaultUser = User("admin", "Default User", "default", DateTime.now)
-      MongoService.create(defaultUser)
-    }
   }
 
   override def onStop(app: Application) {

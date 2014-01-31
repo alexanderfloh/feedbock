@@ -12,7 +12,12 @@ object ApplicationBuild extends Build {
     //jdbc,
     //anorm,
     //"org.reactivemongo" %% "reactivemongo" % "0.9",
-    "org.reactivemongo" %% "play2-reactivemongo" % "0.9"
+    "org.reactivemongo" %% "play2-reactivemongo" % "0.9",
+    
+    "org.jvnet.com4j" % "com4j" % "20110320",
+    "org.jvnet.com4j.typelibs" % "ado20" % "1.0",
+    "org.jvnet.com4j.typelibs" % "active-directory" % "1.0"
+    
   )
 
   val main = play.Project(appName, appVersion, appDependencies).settings(

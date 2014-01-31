@@ -51,15 +51,4 @@ object MongoService {
   def saveMetaInformation(doc: MetaInformation) = {
     metaInformation.save(doc)
   }
-
-  def loadUser(key: String) = {
-    val query = BSONDocument(
-      "_id" -> key)
-    users.find(query).cursor[User].headOption
-  }
-
-  def create(user: User) = {
-    users.save(user)
-  }
-
 }
