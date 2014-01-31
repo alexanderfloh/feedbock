@@ -4,8 +4,8 @@ import play.Project._
 
 object ApplicationBuild extends Build {
 
-  val appName         = "feedbock"
-  val appVersion      = "1.0-SNAPSHOT"
+  val appName = "feedbock"
+  val appVersion = "1.0-SNAPSHOT"
 
   val appDependencies = Seq(
     // Add your project dependencies here,
@@ -13,16 +13,16 @@ object ApplicationBuild extends Build {
     //anorm,
     //"org.reactivemongo" %% "reactivemongo" % "0.9",
     "org.reactivemongo" %% "play2-reactivemongo" % "0.9",
-    
-    "org.jvnet.com4j" % "com4j" % "20110320",
+
+    "org.jvnet.com4j" % "com4j" % "20120426-2",
     "org.jvnet.com4j.typelibs" % "ado20" % "1.0",
-    "org.jvnet.com4j.typelibs" % "active-directory" % "1.0"
-    
-  )
+    "org.jvnet.com4j.typelibs" % "active-directory" % "1.0")
 
   val main = play.Project(appName, appVersion, appDependencies).settings(
     // Add your own project settings here     
-    resolvers += Resolver.sonatypeRepo("snapshots")
-  )
+    resolvers ++= Seq(
+      Resolver.sonatypeRepo("snapshots"),
+      "Jenkins Releases" at "http://maven.jenkins-ci.org/content/repositories/releases")
+      )
 
 }
