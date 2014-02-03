@@ -14,8 +14,8 @@ import services.MongoService
 
 object Global extends GlobalSettings {
   override def onStart(app: Application) {
-    val actor = Akka.system.actorOf(Props[TestResultLoadActor], name = "testResultLoadActor")
-    if (Play.current.configuration.getString("autoload.results").map(_.toBoolean).getOrElse(true)) {
+    if (Play.current.configuration.getBoolean("autoload.results").getOrElse(true)) {
+      val actor = Akka.system.actorOf(Props[TestResultLoadActor], name = "testResultLoadActor")
       Akka.system.scheduler.schedule(5.seconds, 5.minutes, actor, actors.LoadResult)
     } else {
       Logger.info("result auto-loading disabled in config file")

@@ -15,7 +15,8 @@ import play.api.mvc.Controller
 import play.api.mvc.RequestHeader
 import services.MongoService
 import scala.concurrent.duration.Duration
-import services.ActiveDirectoryAuthenticationProvider
+import services.auth.ActiveDirectoryAuthenticationProvider
+import services.auth.AuthenticationProvider
 
 object Application extends Controller with Secured {
 
@@ -31,7 +32,7 @@ object Application extends Controller with Secured {
               val build = buildMeta.value.toInt
               for {
                 //passedTests <- MongoService.loadPassedTests(build).toList
-                failed <- MongoService.loadFailedTestsSortedByScoreDesc(build).toList
+                failed <- MongoService.loadFailedTestsSortedByScoreDesc(build).toList(20, true)
               } yield {
                 val passedScore = 12345 //passedTests.map(tc => tc.score * tc.passedConfigsForBuild(build).size).sum
 
@@ -52,7 +53,7 @@ object Application extends Controller with Secured {
   def authenticate = Action {
     implicit request =>
       val (userName, password) = signinForm.bindFromRequest.get
-      val user = ActiveDirectoryAuthenticationProvider().retrieveUser(userName, password)
+      val user = AuthenticationProvider().retrieveUser(userName, password)
 
       user.map { u =>
         Redirect(routes.Application.index).withSession("userId" -> u.userName)

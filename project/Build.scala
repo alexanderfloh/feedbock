@@ -12,7 +12,7 @@ object ApplicationBuild extends Build {
     //jdbc,
     //anorm,
     //"org.reactivemongo" %% "reactivemongo" % "0.9",
-    "org.reactivemongo" %% "play2-reactivemongo" % "0.9",
+    "org.reactivemongo" %% "play2-reactivemongo" % "0.10.0" exclude("org.scala-stm", "scala-stm_2.10.0"),
 
     "org.jvnet.com4j" % "com4j" % "20120426-2",
     "org.jvnet.com4j.typelibs" % "ado20" % "1.0",

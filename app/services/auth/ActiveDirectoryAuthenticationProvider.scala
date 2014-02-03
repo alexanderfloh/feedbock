@@ -1,10 +1,6 @@
-package services
-
-import play.Application
-import play.api.Play
+package services.auth
 import play.api.Logger
 import com4j.COM4J
-import com4j.Com4jObject
 import com4j.ComException
 import com4j.ExecutionException
 import com4j.Variant
@@ -13,17 +9,16 @@ import com4j.typelibs.activeDirectory.IADsGroup
 import com4j.typelibs.activeDirectory.IADsOpenDSObject
 import com4j.typelibs.activeDirectory.IADsUser
 import com4j.typelibs.ado20.ClassFactory
-import com4j.typelibs.ado20._Command
 import com4j.typelibs.ado20._Connection
-import com4j.typelibs.ado20._Recordset
 import com4j.util.ComObjectCollector
 import java.io.IOException
-import java.util.ArrayList
-import java.util.List
 import scala.collection.mutable.ListBuffer
 import scala.collection.JavaConversions
-
-case class User(val userName: String)
+import com4j.typelibs.activeDirectory.IADs
+import com4j.typelibs.activeDirectory.IADsGroup
+import com4j.typelibs.activeDirectory.IADsOpenDSObject
+import services.auth.AuthenticationProvider
+import services.auth.User
 
 case class GrantedAuthority(auth: String)
 
@@ -33,7 +28,7 @@ case class GrantedAuthority(auth: String)
  *
  * @author Kohsuke Kawaguchi
  */
-class ActiveDirectoryAuthenticationProvider(defaultNamingContext: String, con: _Connection) {
+class ActiveDirectoryAuthenticationProvider(defaultNamingContext: String, con: _Connection) extends AuthenticationProvider {
 
     /**
      * Converts a value of the "distinguished name" attribute of some AD object
