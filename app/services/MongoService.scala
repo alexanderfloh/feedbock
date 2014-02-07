@@ -8,6 +8,8 @@ import play.modules.reactivemongo.ReactiveMongoPlugin
 import play.api.Play.current
 import scala.concurrent.ExecutionContext.Implicits.global
 import models._
+import models.AccumulatedBuildScore.accumulatedBuildScoreHandler
+import reactivemongo.core.commands._
 
 object MongoService {
   /** Returns the default database (as specified in `application.conf`). */
@@ -50,5 +52,17 @@ object MongoService {
 
   def saveMetaInformation(doc: MetaInformation) = {
     metaInformation.save(doc)
+  }
+
+  def calcScoreForBuild(build: Int) = {
+    val cmd = Aggregate("testCases", Seq(
+      Match(BSONDocument("configurations.passed" -> BSONInteger(build))),
+      Unwind("configurations"),
+      Match(BSONDocument("configurations.passed" -> BSONInteger(build))),
+      Group(BSONInteger(build))("scoreOfBuild" -> SumField("score"))
+    ))
+    val result = db.command(cmd, ReadPreference.Primary)
+    //result.map(_.headOption.map(d => d.as[AccumulatedBuildScore]()))
+    result
   }
 }

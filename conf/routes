@@ -5,6 +5,7 @@
 # Home page
 GET     / controllers.Application.index
 GET     /login controllers.Application.login
+GET     /calcScore/:build controllers.Application.calcScore(build: Int)
 
 POST    /submitFeedback/:suite/:className/:test controllers.Application.submitFeedback(suite: String, className: String, test: String)
 POST    /authenticate/ controllers.Application.authenticate

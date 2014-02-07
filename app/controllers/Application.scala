@@ -17,6 +17,7 @@ import services.MongoService
 import scala.concurrent.duration.Duration
 import services.auth.ActiveDirectoryAuthenticationProvider
 import services.auth.AuthenticationProvider
+import reactivemongo.bson.BSONDocument
 
 object Application extends Controller with Secured {
 
@@ -45,6 +46,13 @@ object Application extends Controller with Secured {
             }.getOrElse(Future(BadRequest("unable to access meta information")))
           }
         }
+  }
+  
+  def calcScore(build: Int) = {
+    Action.async{
+      val f = MongoService.calcScoreForBuild(build)
+      f.map(s => Ok("ok: "+ s.toList.length + " " + s.toList.map(BSONDocument.pretty(_))))
+    }
   }
 
   /**
