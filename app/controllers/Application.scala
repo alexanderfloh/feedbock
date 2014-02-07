@@ -18,6 +18,7 @@ import scala.concurrent.duration.Duration
 import services.auth.ActiveDirectoryAuthenticationProvider
 import services.auth.AuthenticationProvider
 import reactivemongo.bson.BSONDocument
+import models.BuildStats
 
 object Application extends Controller with Secured {
 
@@ -31,27 +32,34 @@ object Application extends Controller with Secured {
           buildFuture.flatMap { buildOpt =>
             buildOpt.map { buildMeta =>
               val build = buildMeta.value.toInt
+              val statsStream = MongoService.buildStatsStream(build)
+              val statsColFuture = Future.sequence(statsStream.map(_.withFilter(_.isDefined).map(_.get)).take(3).toSeq)
               for {
                 //passedTests <- MongoService.loadPassedTests(build).toList
                 failed <- MongoService.loadFailedTestsSortedByScoreDesc(build).toList(20, true)
+                statOpt <- MongoService.calcScoreForBuild(build)
+                statsCol <- statsColFuture
               } yield {
-                val passedScore = 12345 //passedTests.map(tc => tc.score * tc.passedConfigsForBuild(build).size).sum
+                val stats = statOpt.getOrElse(BuildStats(build, 0))
 
                 def generateDetailsView(testCase: TestCase, mostRecentBuildNumber: Int) =
                   views.html.testCaseDetails(testCase, mostRecentBuildNumber, feedbackForm)
 
                 val failedWithDetails = failed.map(tc => (tc, generateDetailsView(tc, build)))
-                Ok(views.html.index(passedScore, build, failedWithDetails, user))
+                Ok(views.html.index(statsCol, build, failedWithDetails, user))
               }
             }.getOrElse(Future(BadRequest("unable to access meta information")))
           }
         }
   }
-  
+
   def calcScore(build: Int) = {
-    Action.async{
-      val f = MongoService.calcScoreForBuild(build)
-      f.map(s => Ok("ok: "+ s.toList.length + " " + s.toList.map(BSONDocument.pretty(_))))
+    Action.async {
+      for {
+        statOpt <- MongoService.calcScoreForBuild(build)
+      } yield {
+        statOpt.map(stat => Ok(stat.toString)).getOrElse(NotFound(s"no stats for build $build"))
+      }
     }
   }
 

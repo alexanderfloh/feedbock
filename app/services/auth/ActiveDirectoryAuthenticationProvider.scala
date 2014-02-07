@@ -17,8 +17,6 @@ import scala.collection.JavaConversions
 import com4j.typelibs.activeDirectory.IADs
 import com4j.typelibs.activeDirectory.IADsGroup
 import com4j.typelibs.activeDirectory.IADsOpenDSObject
-import services.auth.AuthenticationProvider
-import services.auth.User
 
 case class GrantedAuthority(auth: String)
 

@@ -1,4 +1,4 @@
-@(passedCount: Int, 
+@(stats: Seq[BuildStats], 
   currentBuild: Int, 
   testCases: List[(TestCase, Html)],
   user: String)
@@ -41,14 +41,15 @@
 				</div>
 				<div>
 					<span>Score</span>
-					<p>@passedCount</p>
+					<p>@stats(0).scoreFormatted</p>
 				</div>
 			</div>
 			<ul class="graph">
-				<li><span style="height: 80%"></span></li>
-				<li><span style="height: 20%"></span></li>
-				<li><span style="height: 60%"></span></li>
-				<li><span style="height: 85%"></span></li>
+			@stats.reverse.map { buildStat =>
+			  <li title="Build @buildStat._id: Score @buildStat.scoreFormatted">
+			   <span style="height: @{buildStat.scoreOfBuild / ((stats.maxBy(_.scoreOfBuild).scoreOfBuild) / 100)}%"></span>
+			  </li>
+			}
 			</ul>
 		</section>
 
