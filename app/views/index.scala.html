@@ -46,7 +46,7 @@
 			</div>
 			<ul class="graph">
 			@stats.reverse.map { buildStat =>
-			  <li title="Build @buildStat._id: Score @buildStat.scoreFormatted">
+			  <li title="Build @buildStat.build: Score @buildStat.scoreFormatted">
 			   <span style="height: @{buildStat.scoreOfBuild / ((stats.maxBy(_.scoreOfBuild).scoreOfBuild) / 100)}%"></span>
 			  </li>
 			}

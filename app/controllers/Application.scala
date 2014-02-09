@@ -35,7 +35,6 @@ object Application extends Controller with Secured {
               val statsStream = MongoService.buildStatsStream(build)
               val statsColFuture = Future.sequence(statsStream.map(_.withFilter(_.isDefined).map(_.get)).take(3).toSeq)
               for {
-                //passedTests <- MongoService.loadPassedTests(build).toList
                 failed <- MongoService.loadFailedTestsSortedByScoreDesc(build).toList(20, true)
                 statOpt <- MongoService.calcScoreForBuild(build)
                 statsCol <- statsColFuture
@@ -103,7 +102,7 @@ object Application extends Controller with Secured {
           } yield {
             val feedback = TestCaseFeedback(
               user, //userObj.get.globalId,
-              "userName", //userObj.get.alias,
+              user, //TODO: alias //userObj.get.alias,
               currentBuild.value.toInt,
               DateTime.now,
               defect,
