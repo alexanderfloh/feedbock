@@ -4,7 +4,7 @@ import play.api.mvc._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ Await, Future }
 import org.joda.time.DateTime
-import models.{ User, TestCaseFeedback, TestCaseKey, TestCase }
+import models.{ TestCaseFeedback, TestCaseKey, TestCase }
 import play.api._
 import play.api.data.Form
 import play.api.data.Forms.boolean
