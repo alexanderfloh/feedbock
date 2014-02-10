@@ -9,7 +9,6 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.libs.Akka
 import play.api.Mode
 import org.joda.time.DateTime
-import models.User
 import services.MongoService
 
 object Global extends GlobalSettings {
