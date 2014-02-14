@@ -25,19 +25,23 @@ object Results {
       mostRecentBuild <- findMostRecentBuild(jobUrl)
     } yield {
       val triggeringBuild = findRootTriggerBuild(mostRecentBuild.url)
-      Logger.info("triggering build " + triggeringBuild)
       val testcases = loadResultsForBuild(mostRecentBuild, triggeringBuild.number)
-      Logger.info("collected results for build " + triggeringBuild.number + ", found " + testcases.size + " tests")
-      (triggeringBuild.number, testcases)
+      Logger.info(s"collected results for build ${triggeringBuild.number}")
       MongoService.saveMetaInformation(MetaInformation("mostRecentBuildNumber", triggeringBuild.number.toString))
+    }
+  }
+
+  def loadResultsForTestRun(testRunBuildNumber: Int) = {
+    for (build <- loadBuild(testRunBuildNumber)) yield {
+      val triggeringBuild = findRootTriggerBuild(build.url)
+      loadResultsForBuild(build, triggeringBuild.number)
     }
   }
 
   def loadResultsForBuild(build: Build, triggeringBuildNumber: Int) = {
     val xml = XML.load(fromUrl(build.url + "/testReport/api/xml"))
-    println("parsing")
     val testcaseNodes = xml \\ "case"
-    testcaseNodes.map(tc => {
+    testcaseNodes.foreach(tc => {
       val testName = tc \ "name"
       val classNameNode = tc \ "className"
       val classNameSplit = classNameNode.text.split("\\.")
@@ -57,12 +61,11 @@ object Results {
         newConfig
       }
       TestStatus.fromStringCaseInsensitive(status.text) match {
-        case Passed => config.passed = config.passed :+ triggeringBuildNumber
-        case Failed => config.failed = config.failed :+ triggeringBuildNumber
+        case Passed => config.passed = config.passed + triggeringBuildNumber
+        case Failed => config.failed = config.failed + triggeringBuildNumber
       }
 
       MongoService.saveTestCase(testCase)
-      testCase
     })
   }
 
@@ -105,6 +108,8 @@ object Results {
       b
     })
   }
+
+  def loadBuild(testRunBuildNumber: Int) = loadBuilds.find(_.number == testRunBuildNumber)
 
   def loadBuilds() = {
     val buildsXml = XML.load(fromUrl(hostName + xmlApiSuffix))

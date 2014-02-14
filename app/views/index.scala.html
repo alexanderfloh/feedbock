@@ -41,7 +41,7 @@
 				</div>
 				<div>
 					<span>Score</span>
-					<p>@stats(0).scoreFormatted</p>
+					<p>@stats.headOption.map(_.scoreFormatted).getOrElse("No score yet.")</p>
 				</div>
 			</div>
 			<ul class="graph">

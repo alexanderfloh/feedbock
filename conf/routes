@@ -17,3 +17,4 @@ GET     /assets/*file controllers.Assets.at(path="/public", file)
 #for debugging
 GET     /calcScore controllers.Application.calcScore(from: Int, to: Int)
 GET     /getStats         controllers.Application.getStats
+GET     /loadResults/:build controllers.Application.loadResults(build: Int)

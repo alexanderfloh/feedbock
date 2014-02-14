@@ -117,6 +117,10 @@ object Application extends Controller with Secured {
       futureList.map(l => Ok(l.mkString("\n")))
     }
   }
+  
+  def loadResults(build: Int) = Action {
+    Ok(results.Results.loadResultsForTestRun(build).toString)
+  }
 
   val feedbackForm = Form(
     tuple(

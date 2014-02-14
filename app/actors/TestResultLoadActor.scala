@@ -27,6 +27,7 @@ class TestResultLoadActor extends Actor {
     }
     optResult.getOrElse(true)
   }
+  
   def receive = {
     case LoadResult => {
       Logger.info("checking for new test results")

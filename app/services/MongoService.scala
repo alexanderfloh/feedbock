@@ -59,7 +59,12 @@ object MongoService {
   
   def saveBuildStats(doc: BuildStats) = buildStats.save(doc) 
   
-  def loadAllStats() = buildStats.find(BSONDocument()).cursor[BuildStats]
+  def loadAllStats() = {
+    val query = BSONDocument(
+        "$query" -> BSONDocument(), 
+        "$orderby" -> BSONDocument("_id" -> -1))
+    buildStats.find(query).cursor[BuildStats]
+  }
   
   def testCalc(fromBuild: Int, toBuild: Int) = {
     for(build <- fromBuild to toBuild) yield {
