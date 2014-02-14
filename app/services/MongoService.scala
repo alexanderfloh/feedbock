@@ -9,6 +9,9 @@ import play.api.Play.current
 import scala.concurrent.ExecutionContext.Implicits.global
 import models._
 import reactivemongo.core.commands._
+import scala.concurrent.Await
+import scala.concurrent.duration._
+import play.Logger
 
 object MongoService {
   /** Returns the default database (as specified in `application.conf`). */
@@ -17,6 +20,7 @@ object MongoService {
   private def testCases = db[BSONCollection]("testCases")
   private def metaInformation = db[BSONCollection]("metaInformation")
   private def users = db[BSONCollection]("users")
+  private def buildStats = db[BSONCollection]("buildStats")
 
   def loadTestCaseByKey(key: TestCaseKey) = {
     val query = BSONDocument("_id" -> BSONDocument(
@@ -53,9 +57,16 @@ object MongoService {
     metaInformation.save(doc)
   }
   
-  def buildStatsStream(latestBuild: Int) = {
-    for(build <- (latestBuild to(0, -1)).toStream) yield {
-      calcScoreForBuild(build)
+  def saveBuildStats(doc: BuildStats) = buildStats.save(doc) 
+  
+  def loadAllStats() = buildStats.find(BSONDocument()).cursor[BuildStats]
+  
+  def testCalc(fromBuild: Int, toBuild: Int) = {
+    for(build <- fromBuild to toBuild) yield {
+      val res = Await.result(calcScoreForBuild(build), 5 minutes)
+      Logger.info(s"result $res")
+      for(stat <- res) yield saveBuildStats(stat)
+      "ok"
     }
   }
 

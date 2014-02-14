@@ -32,12 +32,10 @@ object Application extends Controller with Secured {
           buildFuture.flatMap { buildOpt =>
             buildOpt.map { buildMeta =>
               val build = buildMeta.value.toInt
-              val statsStream = MongoService.buildStatsStream(build)
-              val statsColFuture = Future.sequence(statsStream.map(_.withFilter(_.isDefined).map(_.get)).take(3).toSeq)
               for {
-                failed <- MongoService.loadFailedTestsSortedByScoreDesc(build).toList(20, true)
+                failed <- MongoService.loadFailedTestsSortedByScoreDesc(build).collect[List](20, true)
                 statOpt <- MongoService.calcScoreForBuild(build)
-                statsCol <- statsColFuture
+                futureList <- MongoService.loadAllStats.collect[List](4, true)
               } yield {
                 val stats = statOpt.getOrElse(BuildStats(build, 0))
 
@@ -45,21 +43,11 @@ object Application extends Controller with Secured {
                   views.html.testCaseDetails(testCase, mostRecentBuildNumber, feedbackForm)
 
                 val failedWithDetails = failed.map(tc => (tc, generateDetailsView(tc, build)))
-                Ok(views.html.index(statsCol, build, failedWithDetails, user))
+                Ok(views.html.index(futureList, build, failedWithDetails, user))
               }
             }.getOrElse(Future(BadRequest("unable to access meta information")))
           }
         }
-  }
-
-  def calcScore(build: Int) = {
-    Action.async {
-      for {
-        statOpt <- MongoService.calcScoreForBuild(build)
-      } yield {
-        statOpt.map(stat => Ok(stat.toString)).getOrElse(NotFound(s"no stats for build $build"))
-      }
-    }
   }
 
   /**
@@ -116,6 +104,18 @@ object Application extends Controller with Secured {
           actionOpt.getOrElse(NotFound("invalid test case id"))
         }
       }
+  }
+  
+  // for debugging
+  def calcScore(from: Int, to: Int) = Action{
+    Ok(MongoService.testCalc(from, to).toString)
+  }
+  
+  def getStats = {
+    Action.async {
+      val futureList = MongoService.loadAllStats.collect[List](Int.MaxValue, true)
+      futureList.map(l => Ok(l.mkString("\n")))
+    }
   }
 
   val feedbackForm = Form(
