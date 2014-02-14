@@ -27,26 +27,24 @@ object Application extends Controller with Secured {
   def index = IsAuthenticated {
     user =>
       request =>
-        Async {
-          val buildFuture = MongoService.loadMetaInformation("mostRecentBuildNumber")
-          buildFuture.flatMap { buildOpt =>
-            buildOpt.map { buildMeta =>
-              val build = buildMeta.value.toInt
-              for {
-                failed <- MongoService.loadFailedTestsSortedByScoreDesc(build).collect[List](20, true)
-                statOpt <- MongoService.calcScoreForBuild(build)
-                futureList <- MongoService.loadAllStats.collect[List](4, true)
-              } yield {
-                val stats = statOpt.getOrElse(BuildStats(build, 0))
+        val buildFuture = MongoService.loadMetaInformation("mostRecentBuildNumber")
+        buildFuture.flatMap { buildOpt =>
+          buildOpt.map { buildMeta =>
+            val build = buildMeta.value.toInt
+            for {
+              failed <- MongoService.loadFailedTestsSortedByScoreDesc(build).collect[List](20, true)
+              statOpt <- MongoService.calcScoreForBuild(build)
+              futureList <- MongoService.loadAllStats.collect[List](5, true)
+            } yield {
+              val stats = statOpt.getOrElse(BuildStats(build, 0))
 
-                def generateDetailsView(testCase: TestCase, mostRecentBuildNumber: Int) =
-                  views.html.testCaseDetails(testCase, mostRecentBuildNumber, feedbackForm)
+              def generateDetailsView(testCase: TestCase, mostRecentBuildNumber: Int) =
+                views.html.testCaseDetails(testCase, mostRecentBuildNumber, feedbackForm)
 
-                val failedWithDetails = failed.map(tc => (tc, generateDetailsView(tc, build)))
-                Ok(views.html.index(futureList, build, failedWithDetails, user))
-              }
-            }.getOrElse(Future(BadRequest("unable to access meta information")))
-          }
+              val failedWithDetails = failed.map(tc => (tc, generateDetailsView(tc, build)))
+              Ok(views.html.index(futureList, build, failedWithDetails, user))
+            }
+          }.getOrElse(Future(BadRequest("unable to access meta information")))
         }
   }
 
@@ -77,47 +75,45 @@ object Application extends Controller with Secured {
 
   def submitFeedback(suite: String, className: String, test: String) = IsAuthenticated { user =>
     implicit request =>
-      Async {
-        val (defect, codeChange, timing, comment) = feedbackForm.bindFromRequest.get
-        val id = TestCaseKey(suite, className, test)
-        for {
-          currentBuildOpt <- MongoService.loadMetaInformation("mostRecentBuildNumber")
-          testCaseOpt <- MongoService.loadTestCaseByKey(id)
+      val (defect, codeChange, timing, comment) = feedbackForm.bindFromRequest.get
+      val id = TestCaseKey(suite, className, test)
+      for {
+        currentBuildOpt <- MongoService.loadMetaInformation("mostRecentBuildNumber")
+        testCaseOpt <- MongoService.loadTestCaseByKey(id)
+      } yield {
+        val actionOpt = for {
+          currentBuild <- currentBuildOpt
+          testCase <- testCaseOpt
         } yield {
-          val actionOpt = for {
-            currentBuild <- currentBuildOpt
-            testCase <- testCaseOpt
-          } yield {
-            val feedback = TestCaseFeedback(
-              user, //userObj.get.globalId,
-              user, //TODO: alias //userObj.get.alias,
-              currentBuild.value.toInt,
-              DateTime.now,
-              defect,
-              codeChange,
-              timing,
-              comment)
-            val updated = testCase.withFeedback(feedback)
-            MongoService.saveTestCase(updated)
-            Redirect(routes.Application.index)
-          }
-          actionOpt.getOrElse(NotFound("invalid test case id"))
+          val feedback = TestCaseFeedback(
+            user, //userObj.get.globalId,
+            user, //TODO: alias //userObj.get.alias,
+            currentBuild.value.toInt,
+            DateTime.now,
+            defect,
+            codeChange,
+            timing,
+            comment)
+          val updated = testCase.withFeedback(feedback)
+          MongoService.saveTestCase(updated)
+          Redirect(routes.Application.index)
         }
+        actionOpt.getOrElse(NotFound("invalid test case id"))
       }
   }
-  
+
   // for debugging
-  def calcScore(from: Int, to: Int) = Action{
+  def calcScore(from: Int, to: Int) = Action {
     Ok(MongoService.testCalc(from, to).toString)
   }
-  
+
   def getStats = {
     Action.async {
       val futureList = MongoService.loadAllStats.collect[List](Int.MaxValue, true)
       futureList.map(l => Ok(l.mkString("\n")))
     }
   }
-  
+
   def loadResults(build: Int) = Action {
     Ok(results.Results.loadResultsForTestRun(build).toString)
   }
@@ -141,10 +137,11 @@ trait Secured {
 
   private def onUnauthorized(request: RequestHeader) = Results.Redirect(routes.Application.login)
 
-  def IsAuthenticated(f: => String => Request[AnyContent] => Result) =
-    Security.Authenticated(userId, onUnauthorized) {
-      user =>
-        Action(request => f(user)(request))
+  def IsAuthenticated[A](f: => String => Request[AnyContent] => Future[SimpleResult]) =
+    Security.Authenticated(userId, onUnauthorized) { user =>
+      Action.async { request =>
+        f(user)(request)
+      }
     }
 
 }
