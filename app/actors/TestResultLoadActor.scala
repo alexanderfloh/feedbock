@@ -8,6 +8,7 @@ import services._
 import play.api._
 import scala.concurrent.duration.Duration
 import scala.concurrent.Await
+import scala.concurrent.ExecutionContext.Implicits.global
 
 case class LoadResult()
 
@@ -21,24 +22,22 @@ class TestResultLoadActor extends Actor {
     val optResult = for {
       remoteMostRecent <- results.Results.findMostRecentBuild(jobUrl.get)
     } yield {
-      val triggeringBuild =  results.Results.findRootTriggerBuild(remoteMostRecent.url)
+      val triggeringBuild = results.Results.findRootTriggerBuild(remoteMostRecent.url)
       Logger.info("remote most recent build number: " + triggeringBuild.number)
       localMostRecent.value.toInt < triggeringBuild.number
     }
     optResult.getOrElse(true)
   }
-  
+
   def receive = {
     case LoadResult => {
       Logger.info("checking for new test results")
       if (isNewBuildAvailable) {
         Logger.info("loading new test results")
-        val testcases = results.Results.loadMostRecentBuild(jobUrl.get)
-//        testcases.map {
-//          case (buildNumber, cases) => {
-//            MetaInformation.insertOrUpdate("mostRecentBuildNumber", buildNumber.toString)
-//          }
-//        }
+        for {
+          loadedBuild <- results.Results.loadMostRecentBuild(jobUrl.get)
+          stats <- Await.result(MongoService.calcScoreForBuild(loadedBuild), Duration.Inf)
+        } yield (MongoService.saveBuildStats(stats))
       }
     }
   }

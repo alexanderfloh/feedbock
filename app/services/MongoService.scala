@@ -76,6 +76,7 @@ object MongoService {
   }
 
   def calcScoreForBuild(build: Int) = {
+    Logger.info(s"calculating score for build $build")
     val cmd = Aggregate("testCases", Seq(
       Match(BSONDocument("configurations.passed" -> BSONInteger(build))),
       Unwind("configurations"),

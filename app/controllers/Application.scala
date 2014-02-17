@@ -33,11 +33,8 @@ object Application extends Controller with Secured {
             val build = buildMeta.value.toInt
             for {
               failed <- MongoService.loadFailedTestsSortedByScoreDesc(build).collect[List](20, true)
-              statOpt <- MongoService.calcScoreForBuild(build)
               futureList <- MongoService.loadAllStats.collect[List](5, true)
             } yield {
-              val stats = statOpt.getOrElse(BuildStats(build, 0))
-
               def generateDetailsView(testCase: TestCase, mostRecentBuildNumber: Int) =
                 views.html.testCaseDetails(testCase, mostRecentBuildNumber, feedbackForm)
 
@@ -104,7 +101,9 @@ object Application extends Controller with Secured {
 
   // for debugging
   def calcScore(from: Int, to: Int) = Action {
-    Ok(MongoService.testCalc(from, to).toString)
+    utils.Timer("calc") {
+      Ok(MongoService.testCalc(from, to).toString)
+    }
   }
 
   def getStats = {

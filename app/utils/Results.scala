@@ -8,6 +8,7 @@ import models._
 import services._
 import scala.concurrent.duration.Duration
 import scala.concurrent.Await
+import utils.Timer
 
 case class Build(number: Int, url: String)
 
@@ -28,6 +29,7 @@ object Results {
       val testcases = loadResultsForBuild(mostRecentBuild, triggeringBuild.number)
       Logger.info(s"collected results for build ${triggeringBuild.number}")
       MongoService.saveMetaInformation(MetaInformation("mostRecentBuildNumber", triggeringBuild.number.toString))
+      triggeringBuild.number
     }
   }
 
@@ -38,8 +40,8 @@ object Results {
     }
   }
 
-  def loadResultsForBuild(build: Build, triggeringBuildNumber: Int) = {
-    val xml = XML.load(fromUrl(build.url + "/testReport/api/xml"))
+  def loadResultsForBuild(build: Build, triggeringBuildNumber: Int) = Timer("load results"){
+    val xml = Timer("load xml from server")(XML.load(fromUrl(build.url + "/testReport/api/xml")))
     val testcaseNodes = xml \\ "case"
     testcaseNodes.foreach(tc => {
       val testName = tc \ "name"
@@ -69,7 +71,7 @@ object Results {
     })
   }
 
-  def findRootTriggerBuild(buildUrl: String): Build = {
+  def findRootTriggerBuild(buildUrl: String): Build = Timer("find root triggering build"){
     findRootTriggerBuildRec(Build(0, buildUrl))
   }
 
@@ -85,7 +87,6 @@ object Results {
    * @param url url in the format http://hostname/job/jobName/&lt;buildNumber&gt;
    */
   def findTriggeringBuild(url: String) = {
-    Logger.info(url)
     val buildsXml = XML.load(fromUrl(url + "/api/xml"))
     val cause = buildsXml \\ "cause"
     val upstreamUrl = cause \ "upstreamUrl"
@@ -97,14 +98,14 @@ object Results {
     } yield Build(build.text.toInt, hostName + url.text + build.text)
   }
 
-  def findMostRecentBuild(jobUrl: String) = {
+  def findMostRecentBuild(jobUrl: String) = Timer("find most recent build"){
     val buildsXml = XML.load(fromUrl(hostName + xmlApiSuffix))
     val mostRecentBuild = (buildsXml \\ "build").headOption
     mostRecentBuild.map(node => {
       val numberNode = node \ "number"
       val urlNode = node \ "url"
       val b = Build(numberNode.text.toInt, urlNode.text)
-      Logger.info("found most recent build " + b)
+      Logger.debug(s"found most recent build $b")
       b
     })
   }
