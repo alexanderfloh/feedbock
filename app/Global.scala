@@ -10,16 +10,17 @@ import play.libs.Akka
 import play.api.Mode
 import org.joda.time.DateTime
 import services.MongoService
+import services.sc.SCResultLoadActor
 
 object Global extends GlobalSettings {
   override def onStart(app: Application) {
     if (Play.current.configuration.getBoolean("autoload.results").getOrElse(true)) {
       val actor = Akka.system.actorOf(Props[TestResultLoadActor], name = "testResultLoadActor")
-      Akka.system.scheduler.schedule(5.seconds, 5.minutes, actor, actors.LoadResult)
+      //Akka.system.scheduler.schedule(5.seconds, 5.minutes, actor, actors.LoadResult)
     } else {
       Logger.info("result auto-loading disabled in config file")
     }
-
+    val analyzeMaster = Akka.system.actorOf(Props[SCResultLoadActor], name = "resultLoadActor")
   }
 
   override def onStop(app: Application) {

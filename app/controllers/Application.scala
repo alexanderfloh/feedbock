@@ -19,10 +19,18 @@ import services.auth.ActiveDirectoryAuthenticationProvider
 import services.auth.AuthenticationProvider
 import reactivemongo.bson.BSONDocument
 import models.BuildStats
+import play.api.libs.ws.WS
+import services.sc.SCResultParser
+import akka.dispatch.Futures
+import services.sc.RequestBuilder
+import play.api.libs.concurrent.Akka
+import services.sc.TestRun
+import akka.util.Timeout
+import services.sc.LoadResults
 
 object Application extends Controller with Secured {
-
-  val jobUrl = Play.current.configuration.getString("jenkins.jobUrl")
+  val config = Play.current.configuration
+  val jobUrl = config.getString("jenkins.jobUrl")
 
   def index = IsAuthenticated {
     user =>
@@ -115,6 +123,32 @@ object Application extends Controller with Secured {
 
   def loadResults(build: Int) = Action {
     Ok(results.Results.loadResultsForTestRun(build).toString)
+  }
+
+  def loadFromSc = {
+    val runsForBuildReport = config.getString("sc.runsForId.reportId").get
+    val resultsForRun = config.getString("sc.resultsForRun.reportId").get
+    
+    val request = RequestBuilder(runsForBuildReport, ("rp_BuildName", "%276914%27"))
+
+    Action.async {
+      val runsFuture = request.get.map(response => SCResultParser.parseExecutedConfigs(response.body))
+      val detailsFuture = runsFuture.flatMap(runs => Future.sequence(runs.map { run =>
+        Logger.info(s"requesting details for run $run")
+        val key = RequestBuilder(resultsForRun, ("rp_RunId", run.id.toString)).get.flatMap { response =>
+          import play.api.Play.current
+          import akka.pattern.ask
+          import scala.concurrent.duration._
+          val loader = Akka.system.actorSelection("/user/resultLoadActor")
+          implicit val timeout = akka.util.Timeout(600 seconds)
+          loader.ask(LoadResults(1234, response.body)).mapTo[List[TestCaseKey]]
+        }
+        key
+      }))
+      detailsFuture.map(keys => Ok(keys.map(_.length).sum.toString))
+      //Future(Ok(""))
+    }
+
   }
 
   val feedbackForm = Form(
